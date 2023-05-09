@@ -1,0 +1,71 @@
+.overlay .wrapper {
+  transform: translate3d(-10px, -10px, 0);
+  position: absolute;
+  cursor: pointer;
+}
+
+canvas {
+  background-color: black;
+}
+
+.overlay .wrapper .content {
+  position: absolute;
+  color: rgb(254, 254, 254);
+  font-size: 1.05em;
+  font-family: Arial, Helvetica, sans-serif;
+  user-select: none;
+  background-size: contain;
+}
+
+.overlay .wrapper .icon {
+  /*background-image: url(../ring.svg);
+  background-repeat: no-repeat;
+  background-size: contain;
+  stroke: red;
+
+  height: 20px;
+  width: 20px;
+  top: 10px;*/
+  margin: 0;
+  padding: 0;
+  display: block;
+}
+
+.overlay {
+}
+
+.planetInfo {
+  z-index: 12;
+  position: absolute;
+  height: 100%;
+  /*background-color: aliceblue;*/
+}
+
+.slidecontainer {
+  position: absolute;
+  z-index: 12;
+  top: 96%;
+  right: 45%;
+}
+
+.planetInfo .wrapper {
+  background-color: rgba(194, 15, 15, 0);
+  backdrop-filter: blur(0.5px);
+  display: block;
+  position: absolute;
+  top: 0;
+  height: 100%;
+  border-right: 1px solid rgba(255, 255, 255, 0.216);
+}
+
+.planetInfo .wrapper p {
+  color: white;
+  padding: 2px;
+  margin-left: 3%;
+}
+
+.planetInfo .wrapper h1 {
+  color: white;
+  padding: 2px;
+  margin-left: 3%;
+}
