@@ -37,12 +37,12 @@ import { PlanetInfo } from "./planetInfo";
 import { PlanetPath } from "./path";
 import { MyContext } from "./Scene3";
 
-export const Earth = ({ positions }) => {
+export const Earth = ({ positions, speed, getPosition, nameVis, iconVis }) => {
   let distanceScaleFactor = 1000000;
   const [poss, setPos] = useState([]);
   const [lineposs, setLinePos] = useState([]);
   const [getAgain, setGetAgain] = useState(false);
-  const [speed, setSpeed] = useState(60);
+  //const [speed, setSpeed] = useState(60);
   const line = useRef();
   const clouds = useRef("clouds");
   const earth = useRef();
@@ -62,38 +62,18 @@ export const Earth = ({ positions }) => {
     return group;
   }
 
+  useEffect(() => {
+    console.log(speed);
+  }, [speed]);
+
   let currLinePoss = [];
 
   useFrame(() => {
-    if (poss.length % 1000 == 0) {
-      setPos(poss.slice(0, 500));
-    }
-    let date;
-    if (firstRef.current) {
-      date = new Date(Date.now());
-      date.setMilliseconds(0);
-      date.setSeconds(0);
-    }
-    //console.log(poss.length);
-    //console.log(group.current.userData.counter);
-    if (group.current.userData.counter % 250 == 0 || getAgain) {
-      if (!firstRef.current)
-        date = new Date(poss[poss.length - 1].date).toUTCString();
-      const fetchData = async () => {
-        let res = await fetch(
-          `http://127.0.0.1:8000/duration/earth?date=${date}&speed=${speed}` //example and simple data
-        );
-        let response = await res.json();
-
-        setPos(poss.concat(response)); // parse json
-        firstRef.current = false;
-        setGetAgain(false);
-        //console.log(`psss : ${poss.length}`);
-      };
-      fetchData();
-    }
+    //console.log(nameVis);
     clouds.current.rotation.y += 0.00025;
     earth.current.rotation.y += 0.00015;
+    getPosition("earth", setPos, poss, group.current.userData.counter);
+    console.log(poss);
     if (true && group.current.userData.counter < poss.length) {
       group.current.position.set(
         Number(
@@ -110,15 +90,6 @@ export const Earth = ({ positions }) => {
       group.current.userData.counter++;
     }
   }, []);
-
-  const changeSpeed = (newSpeed) => {
-    setPos(poss.slice(0, group.current.userData.counter + 10));
-    setGetAgain(true);
-    console.log(poss);
-    setSpeed(newSpeed);
-  };
-
-  customData.current["changeEarthSpeed"] = changeSpeed;
 
   const col = useLoader(TextureLoader, "../img/earth/6k_earth_daymap.jpg");
   const bump = useLoader(TextureLoader, "../img/earth/earth_bump_1k.jpg");
@@ -137,17 +108,8 @@ export const Earth = ({ positions }) => {
   });
   return (
     <>
-      <PlanetPath
-        positions={poss.slice(0, 1000)}
-        linePos={poss}
-        planet={group}
-        lineAt={group.current ? group.current.userData.counter : 0}
-        color={"lightgreen"}
-        datas={datas}
-        lineLength={20}
-      />
       <group ref={group}>
-        <PlanetOverlay planet={group} />
+        <PlanetOverlay planet={group} nameVis={nameVis} iconVis={iconVis} />
         <mesh ref={earth}>
           <sphereGeometry args={[6371.0 / 6000, 50, 50]} />
           <meshPhongMaterial
