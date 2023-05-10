@@ -79,7 +79,7 @@ export const SharedPlanetState = () => {
     }
 
     if (oldState.length - posCounter < 1500 || speedChanged.current) {
-      console.log("fetch");
+      //console.log("fetch");
       if (oldState.length > 0 && speed > 0) {
         dateTime.current = new Date(
           oldState[oldState.length - 1].date

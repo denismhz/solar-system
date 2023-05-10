@@ -114,12 +114,6 @@ export const Mercury = ({ positions }) => {
   const bump = useLoader(TextureLoader, "../img/mercury/mercurybump.jpg");
   return (
     <>
-      <PlanetPath
-        linePos={poss}
-        planet={group}
-        color={"#a34f5f"}
-        lineLength={20}
-      />
       <group ref={group}>
         <PlanetOverlay planet={group} />
         <mesh ref={mercury}>

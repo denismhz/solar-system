@@ -89,12 +89,6 @@ export const Mars = ({ positions }) => {
   customData.current["changeMarsSpeed"] = changeSpeed;
   return (
     <>
-      <PlanetPath
-        positions={positions}
-        color={"orange"}
-        linePos={poss}
-        lineLength={50}
-      />
       <group ref={group}>
         <PlanetOverlay planet={group} />
         <mesh ref={mars}>

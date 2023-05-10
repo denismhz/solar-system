@@ -112,12 +112,6 @@ export const Venus = ({ positions }) => {
   const bump = useLoader(TextureLoader, "../img/venus/venusbump.jpg");
   return (
     <>
-      <PlanetPath
-        positions={positions}
-        color={"brown"}
-        linePos={poss}
-        lineLength={30}
-      />
       <group ref={group}>
         <PlanetOverlay planet={group} />
         <mesh ref={venus}>

@@ -113,12 +113,6 @@ export const Neptune = ({ positions }) => {
   const col = useLoader(TextureLoader, "../img/neptune/neptunemap.jpg");
   return (
     <>
-      <PlanetPath
-        linePos={poss}
-        planet={group}
-        color={"darkblue"}
-        lineLength={20}
-      />
       <group ref={group}>
         <PlanetOverlay planet={group} />
         <mesh ref={neptune}>

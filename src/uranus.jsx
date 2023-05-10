@@ -114,12 +114,6 @@ export const Uranus = ({ positions }) => {
   const col = useLoader(TextureLoader, "../img/uranus/uranusmap.jpg");
   return (
     <>
-      <PlanetPath
-        linePos={poss}
-        planet={group}
-        color={"lightblue"}
-        lineLength={20}
-      />
       <group ref={group}>
         <PlanetOverlay planet={group} />
         <mesh ref={uranus}>

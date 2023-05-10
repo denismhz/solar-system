@@ -92,12 +92,6 @@ export const Jupiter = ({ positions }) => {
   customData.current["changeJupiterSpeed"] = changeSpeed;
   return (
     <>
-      <PlanetPath
-        linePos={poss}
-        planet={group}
-        color={"yellow"}
-        lineLength={20}
-      />
       <group ref={group}>
         <PlanetOverlay planet={group} />
         <mesh>

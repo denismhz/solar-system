@@ -41,7 +41,7 @@ import { PlanetOverlayContext } from "./SharedPlanetState";
 export const Earth = ({ positions, speed, getPosition }) => {
   let distanceScaleFactor = 1000000;
   const [posArr, setPosArr] = useState([]);
-  const [lineArr, setLineArr] = useState([]);
+  const lineArr = useRef([]);
   const line = useRef();
   const clouds = useRef("clouds");
   const earth = useRef();
@@ -77,10 +77,20 @@ export const Earth = ({ positions, speed, getPosition }) => {
         )
       );
       planetPositionIndex.current += Number(speed);
-      if (speed > 0) setLineArr(lineArr.concat(group.current.position));
+      lineArr.current.push(
+        new THREE.Vector3(
+          Number(
+            posArr[planetPositionIndex.current].position.x / distanceScaleFactor
+          ),
+          Number(
+            posArr[planetPositionIndex.current].position.y / distanceScaleFactor
+          ),
+          Number(
+            posArr[planetPositionIndex.current].position.z / distanceScaleFactor
+          )
+        )
+      );
     }
-    console.log(lineArr.length);
-    console.log(posArr.length);
   }, []);
 
   const col = useLoader(TextureLoader, "../img/earth/6k_earth_daymap.jpg");
@@ -100,6 +110,12 @@ export const Earth = ({ positions, speed, getPosition }) => {
   });
   return (
     <>
+      <PlanetPath
+        linePos={lineArr.current}
+        planet={group}
+        color={"yellow"}
+        lineLength={20}
+      />
       <group ref={group}>
         <PlanetOverlay planet={group} />
         <mesh ref={earth}>
