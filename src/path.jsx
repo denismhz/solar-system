@@ -6,12 +6,14 @@ import React, {
   useLayoutEffect,
   useEffect,
   useState,
+  useContext,
 } from "react";
 import { useControls } from "leva";
 import * as THREE from "three";
 import glsl from "glslify";
 import { TextureLoader } from "three/src/loaders/TextureLoader";
 import { PlanetOverlay } from "./planetOverlay";
+import { PlanetOverlayContext } from "./SharedPlanetState";
 
 export const PlanetPath = ({
   positions,
@@ -23,6 +25,7 @@ export const PlanetPath = ({
   planet,
 }) => {
   const lineref = useRef();
+  const { speed } = useContext(PlanetOverlayContext);
 
   useLayoutEffect(() => {});
 
@@ -77,10 +80,14 @@ export const PlanetPath = ({
 
   const lineGeometry = new THREE.BufferGeometry();
   useFrame(() => {
+    if (speed === 0) {
+      linePos.length = 0;
+      return;
+    }
     lineref.current.geometry.setFromPoints(linePos);
     lineref.current.geometry.setDrawRange(0, Infinity);
     cutPath(linePos, lineLength);
-    console.log(getLength(linePos));
+    //console.log(getLength(linePos));
   });
   return (
     <>
