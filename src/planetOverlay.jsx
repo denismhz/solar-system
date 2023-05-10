@@ -60,13 +60,18 @@ export const PlanetOverlay = ({ planet }) => {
       // native event
       switch (event.nativeEvent.button) {
         case 0:
-          controls.current.target.copy(planet.current.position.clone());
+          //controls.current.target.copy(planet.current.position.clone());
           customData.current.showInfo(planet.current.userData);
+          console.log(planet.current.position);
+
+          customData.current.handleLookAt(planet.current.position);
           console.log(customData);
-          //startFollow();
+          setFollow(true);
           break;
         case 2:
-          //endFollow();
+          setFollow(false);
+          //controls.current.maxDistance = Infinity;
+          console.log("right click");
           break;
       }
     },
@@ -80,6 +85,16 @@ export const PlanetOverlay = ({ planet }) => {
   }, [planet, name, minDistance, customData, iconVis, nameVis]);
 
   useFrame(() => {
+    if (follow) {
+      console.log(follow);
+      customData.current.handlePosition(
+        new THREE.Vector3(
+          planet.current.position.x,
+          planet.current.position.y,
+          planet.current.position.z
+        )
+      );
+    }
     var distance = camera.position.distanceTo(planet.current.position);
     if (distance < minDistance) {
       setOpacity(0);
@@ -87,14 +102,13 @@ export const PlanetOverlay = ({ planet }) => {
       setOpacity(1);
     }
     if (follow && controls) {
-      controls.current.target.copy(planet.current.position.clone());
-      controls.current.maxDistance = 20;
+      //controls.current.target.copy(planet.current.position.clone());
+      //controls.current.maxDistance = 20;
     }
     //console.log(iconVis);
   }, []);
 
   function startFollow() {
-    console.log(ref === ref);
     setFollow(true);
   }
 

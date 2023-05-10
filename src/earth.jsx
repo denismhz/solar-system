@@ -38,7 +38,7 @@ import { PlanetPath } from "./path";
 import { MyContext } from "./Scene3";
 import { PlanetOverlayContext } from "./SharedPlanetState";
 
-export const Earth = ({ positions, speed, getPosition }) => {
+export const Earth = ({ speed, getPosition }) => {
   let distanceScaleFactor = 1000000;
   const [posArr, setPosArr] = useState([]);
   const lineArr = useRef([]);
@@ -46,7 +46,7 @@ export const Earth = ({ positions, speed, getPosition }) => {
   const clouds = useRef("clouds");
   const earth = useRef();
   const group = useRef();
-  const { customData } = useContext(MyContext);
+  const color = useRef("lightgreen");
 
   let planetPositionIndex = useRef(0);
 
@@ -113,7 +113,7 @@ export const Earth = ({ positions, speed, getPosition }) => {
       <PlanetPath
         linePos={lineArr.current}
         planet={group}
-        color={"yellow"}
+        color={color.current}
         lineLength={20}
       />
       <group ref={group}>
