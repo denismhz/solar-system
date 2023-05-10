@@ -56,11 +56,20 @@ export const Earth = ({ positions, speed, getPosition, nameVis, iconVis }) => {
     group.current.userData.name = "Earth";
     group.current.userData.nearOvOp = 60;
     group.current.userData.scolor = "lightgreen";
-  }, []);
-
-  function datas() {
-    return group;
-  }
+    const fetchData = async () => {
+      let res = await fetch(
+        `http://127.0.0.1:8000/duration/earth` +
+          `?date=${new Date(Date.now())}&speed=0`
+      );
+      let response = await res.json();
+      if (speed == 0) setPos([response]);
+    };
+    fetchData();
+    const interval = setInterval(() => {
+      fetchData();
+    }, 6000);
+    return () => clearInterval(interval);
+  }, [speed]);
 
   useEffect(() => {
     console.log(speed);
@@ -69,11 +78,11 @@ export const Earth = ({ positions, speed, getPosition, nameVis, iconVis }) => {
   let currLinePoss = [];
 
   useFrame(() => {
-    //console.log(nameVis);
     clouds.current.rotation.y += 0.00025;
     earth.current.rotation.y += 0.00015;
-    getPosition("earth", setPos, poss, group.current.userData.counter);
-    console.log(poss);
+    if (speed > 0)
+      getPosition("earth", setPos, poss, group.current.userData.counter);
+    //console.log(poss);
     if (true && group.current.userData.counter < poss.length) {
       group.current.position.set(
         Number(

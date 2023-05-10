@@ -19,6 +19,7 @@ export const ScreenOverlay = () => {
   };
 
   const handleReset = () => {
+    customData.current.handleReset();
     console.log("reset");
   };
 

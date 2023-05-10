@@ -50,6 +50,14 @@ export const SharedPlanetState = () => {
   };
   customData.current["handleVisibility"] = handleVisibility;
 
+  let [resetB, setResetB] = useState(false);
+
+  const handleReset = () => {
+    setSpeed(0);
+    dateTime.current = new Date(Date.now());
+  };
+  customData.current["handleReset"] = handleReset;
+
   //set speed (timeinterval between positions 60000ms*speed)
   const [speed, setSpeed] = useState(0);
   const updateSpeed = (newSpeed) => {
@@ -67,11 +75,8 @@ export const SharedPlanetState = () => {
 
     //???????Why when i set the speed to 0 it doesnt immidiatly stop? good enough for know
     if (speedChanged.current) {
-      console.log(oldState.length);
       setPosState(oldState.slice(0, posCounter));
       speedChanged.current = true;
-      console.log(oldState.length);
-      console.log("SPEEDUPDOWNLEFTRIGHT!");
     }
 
     if (posCounter % 250 == 0 || speedChanged.current) {
@@ -88,21 +93,14 @@ export const SharedPlanetState = () => {
         );
         let response = await res.json();
         //console.log(response);
-        if (speed > 0) {
+        if (true) {
           setPosState(oldState.concat(response));
 
           //console.log(dateTime.current);
-        } else if (speed == 0) {
-          //this requests every frame do a function
-          //that requests every minute and clear intervall
-          //when apead is changed to above 0
-          setPosState([response]);
-          posCounter = 0;
         }
         speedChanged.current = false;
       };
       fetchData();
-      //console.log(speed);
     }
   };
 
