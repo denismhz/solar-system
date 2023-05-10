@@ -36,68 +36,51 @@ import { PlanetOverlay } from "./planetOverlay";
 import { PlanetInfo } from "./planetInfo";
 import { PlanetPath } from "./path";
 import { MyContext } from "./Scene3";
+import { PlanetOverlayContext } from "./SharedPlanetState";
 
-export const Earth = ({ positions, speed, getPosition, nameVis, iconVis }) => {
+export const Earth = ({ positions, speed, getPosition }) => {
   let distanceScaleFactor = 1000000;
-  const [poss, setPos] = useState([]);
-  const [lineposs, setLinePos] = useState([]);
-  const [getAgain, setGetAgain] = useState(false);
-  //const [speed, setSpeed] = useState(60);
+  const [posArr, setPosArr] = useState([]);
+  const [lineArr, setLineArr] = useState([]);
   const line = useRef();
   const clouds = useRef("clouds");
   const earth = useRef();
   const group = useRef();
-  const firstRef = useRef(true);
-  let linePoss = [];
   const { customData } = useContext(MyContext);
 
+  let planetPositionIndex = useRef(0);
+
   useLayoutEffect(() => {
-    group.current.userData.counter = 0;
     group.current.userData.name = "Earth";
     group.current.userData.nearOvOp = 60;
     group.current.userData.scolor = "lightgreen";
-    const fetchData = async () => {
-      let res = await fetch(
-        `http://127.0.0.1:8000/duration/earth` +
-          `?date=${new Date(Date.now())}&speed=0`
-      );
-      let response = await res.json();
-      if (speed == 0) setPos([response]);
-    };
-    fetchData();
-    const interval = setInterval(() => {
-      fetchData();
-    }, 6000);
-    return () => clearInterval(interval);
-  }, [speed]);
-
-  useEffect(() => {
-    console.log(speed);
-  }, [speed]);
-
-  let currLinePoss = [];
+  });
 
   useFrame(() => {
     clouds.current.rotation.y += 0.00025;
     earth.current.rotation.y += 0.00015;
-    if (speed > 0)
-      getPosition("earth", setPos, poss, group.current.userData.counter);
-    //console.log(poss);
-    if (true && group.current.userData.counter < poss.length) {
+    getPosition("earth", setPosArr, posArr, planetPositionIndex.current);
+
+    //if speed is 0 set the date to current date get from posArr
+    //search for current date in posArr an set planetPositionIndex
+    if (speed == 0) planetPositionIndex.current = 0;
+    if (true && planetPositionIndex.current < posArr.length) {
       group.current.position.set(
         Number(
-          poss[group.current.userData.counter].position.x / distanceScaleFactor
+          posArr[planetPositionIndex.current].position.x / distanceScaleFactor
         ),
         Number(
-          poss[group.current.userData.counter].position.y / distanceScaleFactor
+          posArr[planetPositionIndex.current].position.y / distanceScaleFactor
         ),
         Number(
-          poss[group.current.userData.counter].position.z / distanceScaleFactor
+          posArr[planetPositionIndex.current].position.z / distanceScaleFactor
         )
       );
-      //console.log(group.current.userData.counter);
-      group.current.userData.counter++;
+      planetPositionIndex.current += Number(speed);
+      if (speed > 0) setLineArr(lineArr.concat(group.current.position));
     }
+    console.log(lineArr.length);
+    console.log(posArr.length);
   }, []);
 
   const col = useLoader(TextureLoader, "../img/earth/6k_earth_daymap.jpg");
@@ -118,7 +101,7 @@ export const Earth = ({ positions, speed, getPosition, nameVis, iconVis }) => {
   return (
     <>
       <group ref={group}>
-        <PlanetOverlay planet={group} nameVis={nameVis} iconVis={iconVis} />
+        <PlanetOverlay planet={group} />
         <mesh ref={earth}>
           <sphereGeometry args={[6371.0 / 6000, 50, 50]} />
           <meshPhongMaterial

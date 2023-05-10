@@ -26,11 +26,13 @@ import { MyContext } from "./Scene3";
 import "./styles.css";
 
 import PropTypes from "prop-types";
+import { PlanetOverlayContext } from "./SharedPlanetState";
 
-export const PlanetOverlay = ({ planet, nameVis, iconVis }) => {
+export const PlanetOverlay = ({ planet }) => {
   const ref = useRef();
   let [opacity, setOpacity] = useState(0);
   let [minDistance, setMinDistance] = useState(0);
+  const { nameVis, iconVis } = useContext(PlanetOverlayContext);
 
   let [scolor, setSColor] = useState("white");
   let [follow, setFollow] = useState(false);

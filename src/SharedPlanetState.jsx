@@ -26,6 +26,8 @@ import { Skybox } from "./skybox.jsx";
 import { ReactPropTypes } from "react";
 import { MyContext } from "./Scene3.jsx";
 
+export const PlanetOverlayContext = createContext();
+
 export const SharedPlanetState = () => {
   const { customData } = useContext(MyContext);
 
@@ -50,16 +52,13 @@ export const SharedPlanetState = () => {
   };
   customData.current["handleVisibility"] = handleVisibility;
 
-  let [resetB, setResetB] = useState(false);
-
   const handleReset = () => {
     setSpeed(0);
-    dateTime.current = new Date(Date.now());
   };
   customData.current["handleReset"] = handleReset;
 
   //set speed (timeinterval between positions 60000ms*speed)
-  const [speed, setSpeed] = useState(0);
+  const [speed, setSpeed] = useState(1);
   const updateSpeed = (newSpeed) => {
     setSpeed(newSpeed);
     speedChanged.current = true;
@@ -75,11 +74,12 @@ export const SharedPlanetState = () => {
 
     //???????Why when i set the speed to 0 it doesnt immidiatly stop? good enough for know
     if (speedChanged.current) {
-      setPosState(oldState.slice(0, posCounter));
+      setPosState(oldState.slice(0, posCounter + 10));
       speedChanged.current = true;
     }
 
-    if (posCounter % 250 == 0 || speedChanged.current) {
+    if (oldState.length - posCounter < 1500 || speedChanged.current) {
+      console.log("fetch");
       if (oldState.length > 0 && speed > 0) {
         dateTime.current = new Date(
           oldState[oldState.length - 1].date
@@ -92,12 +92,7 @@ export const SharedPlanetState = () => {
             `?date=${dateTime.current}&speed=${speed}`
         );
         let response = await res.json();
-        //console.log(response);
-        if (true) {
-          setPosState(oldState.concat(response));
-
-          //console.log(dateTime.current);
-        }
+        setPosState(oldState.concat(response));
         speedChanged.current = false;
       };
       fetchData();
@@ -106,20 +101,17 @@ export const SharedPlanetState = () => {
 
   return (
     <>
-      <Earth
-        speed={speed}
-        getPosition={getPositions}
-        nameVis={nameVis}
-        iconVis={iconVis}
-      />
-      <Mars speed={speed} />
-      <Jupiter speed={speed} />
-      <Saturn speed={speed} />
-      <Mercury speed={speed} />
-      <Venus speed={speed} />
-      <Neptune speed={speed} />
-      <Uranus speed={speed} />
-      <Sun />
+      <PlanetOverlayContext.Provider value={{ nameVis, iconVis, speed }}>
+        <Earth speed={speed} getPosition={getPositions} />
+        <Mars speed={speed} />
+        <Jupiter speed={speed} />
+        <Saturn speed={speed} />
+        <Mercury speed={speed} />
+        <Venus speed={speed} />
+        <Neptune speed={speed} />
+        <Uranus speed={speed} />
+        <Sun />
+      </PlanetOverlayContext.Provider>
     </>
   );
 };
