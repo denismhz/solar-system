@@ -33,9 +33,9 @@ export const ScreenOverlay = () => {
       <div className="slidecontainer">
         <input
           type="range"
-          min="1"
-          max="10"
-          step="1"
+          min="30"
+          max="120"
+          step="30"
           className="slider"
           id="myRange"
           onChange={handleChange}
