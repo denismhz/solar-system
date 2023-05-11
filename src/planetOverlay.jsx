@@ -26,11 +26,14 @@ import { MyContext } from "./Scene3";
 import "./styles.css";
 
 import PropTypes from "prop-types";
+import { PlanetOverlayContext } from "./SharedPlanetState";
 
 export const PlanetOverlay = ({ planet }) => {
   const ref = useRef();
   let [opacity, setOpacity] = useState(0);
   let [minDistance, setMinDistance] = useState(0);
+  const { nameVis, iconVis } = useContext(PlanetOverlayContext);
+
   let [scolor, setSColor] = useState("white");
   let [follow, setFollow] = useState(false);
   const { camera } = useThree();
@@ -74,7 +77,7 @@ export const PlanetOverlay = ({ planet }) => {
     setName(planet.current.userData.name);
     setMinDistance(planet.current.userData.nearOvOp);
     setSColor(planet.current.userData.scolor);
-  }, [planet, name, minDistance, customData]);
+  }, [planet, name, minDistance, customData, iconVis, nameVis]);
 
   useFrame(() => {
     var distance = camera.position.distanceTo(planet.current.position);
@@ -87,6 +90,7 @@ export const PlanetOverlay = ({ planet }) => {
       controls.current.target.copy(planet.current.position.clone());
       controls.current.maxDistance = 20;
     }
+    //console.log(iconVis);
   }, []);
 
   function startFollow() {
@@ -112,6 +116,7 @@ export const PlanetOverlay = ({ planet }) => {
             className="icon"
             onClick={handleClick}
             onContextMenu={handleClick}
+            style={{ visibility: iconVis }}
           >
             <svg
               onMouseEnter={() => setSColor("blue")}
@@ -121,7 +126,9 @@ export const PlanetOverlay = ({ planet }) => {
               <circle cx="10" cy="10" r="9" strokeWidth="1" fill="none" />
             </svg>
           </span>
-          <span className="content">{name}</span>
+          <span className="content" style={{ visibility: nameVis }}>
+            {name}
+          </span>
         </div>
       </Html>
     </>

@@ -69,7 +69,7 @@ export const Uranus = ({ positions }) => {
     }
     //console.log(poss.length);
     //console.log(group.current.userData.counter);
-    if (group.current.userData.counter % 250 == 0 || getAgain) {
+    if (false && group.current.userData.counter % 250 == 0 && getAgain) {
       if (!firstRef.current)
         date = new Date(poss[poss.length - 1].date).toUTCString();
       const fetchData = async () => {
@@ -114,12 +114,6 @@ export const Uranus = ({ positions }) => {
   const col = useLoader(TextureLoader, "../img/uranus/uranusmap.jpg");
   return (
     <>
-      <PlanetPath
-        linePos={poss}
-        planet={group}
-        color={"lightblue"}
-        lineLength={20}
-      />
       <group ref={group}>
         <PlanetOverlay planet={group} />
         <mesh ref={uranus}>

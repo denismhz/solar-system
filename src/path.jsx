@@ -6,12 +6,14 @@ import React, {
   useLayoutEffect,
   useEffect,
   useState,
+  useContext,
 } from "react";
 import { useControls } from "leva";
 import * as THREE from "three";
 import glsl from "glslify";
 import { TextureLoader } from "three/src/loaders/TextureLoader";
 import { PlanetOverlay } from "./planetOverlay";
+import { PlanetOverlayContext } from "./SharedPlanetState";
 
 export const PlanetPath = ({
   positions,
@@ -22,37 +24,51 @@ export const PlanetPath = ({
   lineAt,
   planet,
 }) => {
-  let distanceScaleFactor = 1000000;
-  const otherPoints = useRef([]);
-  const counter = useRef(0);
-  const shiftCounter = useRef(0);
-  const [points, setPoints] = useState([]);
-
-  /*const points = positions.map(
-    (pos) =>
-      new THREE.Vector3(
-        pos.x / distanceScaleFactor,
-        pos.y / distanceScaleFactor,
-        pos.z / distanceScaleFactor
-      )
-  );*/
   const lineref = useRef();
-  //if (lineref) lineref.current.userData.counter = 0;
+  const { speed } = useContext(PlanetOverlayContext);
 
-  useLayoutEffect(() => {
-    if (linePos) {
-      for (var i = linePos.length - 1; i >= 0; i--) {
-        otherPoints.current[i] = new THREE.Vector3(
-          linePos[i].position.x / distanceScaleFactor,
-          linePos[i].position.y / distanceScaleFactor,
-          linePos[i].position.z / distanceScaleFactor
-        );
+  useLayoutEffect(() => {});
+
+  useEffect(() => {});
+
+  /* const cutPath = (path, maxLength) => {
+    if (getLength(path) > maxLength) {
+      path.shift();
+    }
+  };*/
+
+  //from chatgpt very nice :D
+  const cutPath = (path, maxLength) => {
+    let length = getLength(path);
+    while (length > maxLength && path.length >= 2) {
+      const firstPoint = path[0];
+      const secondPoint = path[1];
+      const segmentLength = firstPoint.distanceTo(secondPoint);
+      if (segmentLength > maxLength) {
+        // If the first segment is longer than the maximum length,
+        // split it into multiple segments of the maximum length.
+        const numSegments = Math.ceil(segmentLength / maxLength);
+        const segmentDirection = secondPoint
+          .clone()
+          .sub(firstPoint)
+          .normalize();
+        const segmentLength = segmentLength / numSegments;
+        const newPoints = [firstPoint];
+        for (let i = 1; i < numSegments; i++) {
+          const newPoint = firstPoint
+            .clone()
+            .add(segmentDirection.clone().multiplyScalar(segmentLength * i));
+          newPoints.push(newPoint);
+        }
+        newPoints.push(secondPoint);
+        path.splice(0, 2, ...newPoints);
+        length = getLength(path);
+      } else {
+        path.shift();
+        length -= segmentLength;
       }
     }
-    //console.log(otherPoints);
-  });
-
-  useEffect(() => {}, []);
+  };
 
   function getLength(arrV3) {
     let sum = 0;
@@ -61,45 +77,21 @@ export const PlanetPath = ({
     }
     return sum;
   }
+
+  const lineGeometry = new THREE.BufferGeometry();
   useFrame(() => {
-    //console.log(planet);
-    /*    if (planet) {
-      otherPoints.current.push(planet.current.position);
-      //console.log(planet.current.position);
+    if (speed === 0) {
+      linePos.length = 0;
+      return;
     }
-    if (otherPoints.current.length > 0) {
-      //console.log(otherPoints.current);
-      //console.log(asd);
-      lineref.current.geometry.setFromPoints(asd);
-      lineref.current.geometry.setDrawRange(0, Infinity);
-
-      //console.log(otherPoints);
-    }*/
-    //console.log(otherPoints);
-    //var start = 0;
-    //if (counter.current > lineLength) start = counter.current - lineLength;
-    var realpoints = otherPoints.current.slice(
-      shiftCounter.current,
-      counter.current
-    );
-    //console.log(getLength(realpoints));
-    if (realpoints.length > 0) {
-      lineref.current.geometry.setFromPoints(realpoints);
-      if (getLength(realpoints) > lineLength) {
-        //console.log("cut");
-        shiftCounter.current++;
-        //realpoints.shift();
-      }
-    }
-
+    lineref.current.geometry.setFromPoints(linePos);
     lineref.current.geometry.setDrawRange(0, Infinity);
-    counter.current++;
-    //console.log(counter.current);
+    cutPath(linePos, lineLength);
+    //console.log(getLength(linePos));
   });
   return (
     <>
-      <line ref={lineref} frustumCulled={false}>
-        <bufferGeometry />
+      <line ref={lineref} geometry={lineGeometry} frustumCulled={false}>
         <lineBasicMaterial color={color} />
       </line>
     </>

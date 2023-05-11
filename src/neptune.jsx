@@ -58,34 +58,7 @@ export const Neptune = ({ positions }) => {
   }, []);
 
   useFrame(() => {
-    if (poss.length % 1000 == 0) {
-      setPos(poss.slice(0, 500));
-    }
-    let date;
-    if (firstRef.current) {
-      date = new Date(Date.now());
-      date.setMilliseconds(0);
-      date.setSeconds(0);
-    }
-    //console.log(poss.length);
-    //console.log(group.current.userData.counter);
-    if (group.current.userData.counter % 250 == 0 || getAgain) {
-      if (!firstRef.current)
-        date = new Date(poss[poss.length - 1].date).toUTCString();
-      const fetchData = async () => {
-        let res = await fetch(
-          `http://127.0.0.1:8000/duration/neptune?date=${date}&speed=${speed}` //example and simple data
-        );
-        let response = await res.json();
-
-        setPos(poss.concat(response)); // parse json
-        firstRef.current = false;
-        setGetAgain(false);
-        //console.log(`psss : ${poss.length}`);
-      };
-      fetchData();
-    }
-    if (true && group.current.userData.counter < poss.length) {
+    if (false && group.current.userData.counter < poss.length) {
       group.current.position.set(
         Number(
           poss[group.current.userData.counter].position.x / distanceScaleFactor
@@ -113,12 +86,6 @@ export const Neptune = ({ positions }) => {
   const col = useLoader(TextureLoader, "../img/neptune/neptunemap.jpg");
   return (
     <>
-      <PlanetPath
-        linePos={poss}
-        planet={group}
-        color={"darkblue"}
-        lineLength={20}
-      />
       <group ref={group}>
         <PlanetOverlay planet={group} />
         <mesh ref={neptune}>
