@@ -41,14 +41,13 @@ export const CameraController = () => {
 
   useFrame(() => {
     //console.log(state);
-    if (animate) {
+    /*if (animate) {
       camera.position.lerp(position, 0.1);
       camera.lookAt(lookAt);
       if (camera.position.distanceTo(position) < 0.1) {
         setAnimate(false);
       }
-    }
-
+    }*/
     //cameraRef.current.position.addScalar(2);
     //camera.position.addScalar(1);
     //console.log(camera);
