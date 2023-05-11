@@ -37,18 +37,19 @@ import { PlanetOverlay } from "./planetOverlay";
 import { PlanetPath } from "./path";
 import { MyContext } from "./Scene3";
 
-export const Neptune = ({ positions }) => {
+export const Neptune = ({ speedChanged, getPosition, speed }) => {
   const [poss, setPos] = useState([]);
-  const [lineposs, setLinePos] = useState([]);
-  const [getAgain, setGetAgain] = useState(false);
-  const [speed, setSpeed] = useState(60);
   let distanceScaleFactor = 1000000;
   const neptune = useRef();
   const group = useRef();
+  const lineArr = useRef([]);
 
-  const firstRef = useRef(true);
-  let linePoss = [];
+  const [posArr, setPosArr] = useState([]);
+
+  let planetPositionIndex = useRef(0);
+
   const { customData } = useContext(MyContext);
+  const lastPositionUpdate = useRef(0);
 
   useLayoutEffect(() => {
     group.current.userData.counter = 0;
@@ -57,21 +58,44 @@ export const Neptune = ({ positions }) => {
     group.current.userData.scolor = "darkblue";
   }, []);
 
-  useFrame(() => {
-    if (false && group.current.userData.counter < poss.length) {
+  useFrame(({ clock }) => {
+    const timeSinceLastUpdate = clock.elapsedTime - lastPositionUpdate.current;
+    if (timeSinceLastUpdate >= 2 || speedChanged) {
+      //console.log("gethis");
+      getPosition("neptune", setPosArr, posArr, planetPositionIndex.current);
+      lastPositionUpdate.current = clock.elapsedTime;
+    }
+    if (speed == 0) planetPositionIndex.current = 0;
+    if (
+      true &&
+      planetPositionIndex.current < posArr.length &&
+      posArr.length > 0
+    ) {
       group.current.position.set(
         Number(
-          poss[group.current.userData.counter].position.x / distanceScaleFactor
+          posArr[planetPositionIndex.current].position.x / distanceScaleFactor
         ),
         Number(
-          poss[group.current.userData.counter].position.y / distanceScaleFactor
+          posArr[planetPositionIndex.current].position.y / distanceScaleFactor
         ),
         Number(
-          poss[group.current.userData.counter].position.z / distanceScaleFactor
+          posArr[planetPositionIndex.current].position.z / distanceScaleFactor
         )
       );
-      //console.log(group.current.userData.counter);
-      group.current.userData.counter++;
+      planetPositionIndex.current += Number(1);
+      lineArr.current.push(
+        new THREE.Vector3(
+          Number(
+            posArr[planetPositionIndex.current].position.x / distanceScaleFactor
+          ),
+          Number(
+            posArr[planetPositionIndex.current].position.y / distanceScaleFactor
+          ),
+          Number(
+            posArr[planetPositionIndex.current].position.z / distanceScaleFactor
+          )
+        )
+      );
     }
   }, []);
 
@@ -86,6 +110,12 @@ export const Neptune = ({ positions }) => {
   const col = useLoader(TextureLoader, "../img/neptune/neptunemap.jpg");
   return (
     <>
+      <PlanetPath
+        linePos={lineArr.current}
+        planet={group}
+        color={"darkblue"}
+        lineLength={20}
+      />
       <group ref={group}>
         <PlanetOverlay planet={group} />
         <mesh ref={neptune}>

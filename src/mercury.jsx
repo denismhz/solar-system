@@ -19,12 +19,13 @@ import "./styles.css";
 import { PlanetOverlay } from "./planetOverlay";
 import { PlanetPath } from "./path";
 
-export const Mercury = ({ speed, getPosition }) => {
+export const Mercury = ({ speed, getPosition, speedChanged }) => {
   const [posArr, setPosArr] = useState([]);
   const lineArr = useRef([]);
   let planetPositionIndex = useRef(0);
   let distanceScaleFactor = 1000000;
   const mercury = useRef();
+  const lastPositionUpdate = useRef(0);
   const group = useRef();
 
   useLayoutEffect(() => {
@@ -33,13 +34,19 @@ export const Mercury = ({ speed, getPosition }) => {
     group.current.userData.scolor = "#a34f5f";
   }, []);
 
-  useFrame(() => {
+  useFrame(({ clock }) => {
     //getPosition("mercury", setPosArr, posArr, planetPositionIndex.current);
+    const timeSinceLastUpdate = clock.elapsedTime - lastPositionUpdate.current;
+    if (timeSinceLastUpdate >= 2 || speedChanged) {
+      //console.log("gethis");
+      getPosition("mercury", setPosArr, posArr, planetPositionIndex.current);
+      lastPositionUpdate.current = clock.elapsedTime;
+    }
 
     //if speed is 0 set the date to current date get from posArr
     //search for current date in posArr an set planetPositionIndex
     if (speed == 0) planetPositionIndex.current = 0;
-    if (false && planetPositionIndex.current < posArr.length) {
+    if (true && planetPositionIndex.current < posArr.length) {
       group.current.position.set(
         Number(
           posArr[planetPositionIndex.current].position.x / distanceScaleFactor
@@ -51,7 +58,7 @@ export const Mercury = ({ speed, getPosition }) => {
           posArr[planetPositionIndex.current].position.z / distanceScaleFactor
         )
       );
-      planetPositionIndex.current += Number(speed);
+      planetPositionIndex.current += Number(1);
       lineArr.current.push(
         new THREE.Vector3(
           Number(
@@ -75,7 +82,7 @@ export const Mercury = ({ speed, getPosition }) => {
         linePos={lineArr.current}
         planet={group}
         color={"#a34f5f"}
-        lineLength={20}
+        lineLength={100}
       />
       <group ref={group}>
         <PlanetOverlay planet={group} />

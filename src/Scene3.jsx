@@ -5,6 +5,7 @@ import React, { Suspense, useRef, createContext, memo } from "react";
 import { ScreenOverlay } from "./omnioverlay.jsx";
 import { SharedPlanetState } from "./SharedPlanetState.jsx";
 import { Skybox } from "./skybox.jsx";
+import { CameraController } from "./CameraControls.jsx";
 
 export const MyContext = createContext();
 
@@ -25,6 +26,7 @@ const SolarSystemScene = () => {
               position: [0, 100, 200],
             }}
           >
+            <CameraController />
             <Skybox />
             <ambientLight intensity={0.5} />
             <SharedPlanetState />

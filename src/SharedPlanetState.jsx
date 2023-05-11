@@ -30,7 +30,6 @@ export const PlanetOverlayContext = createContext();
 
 export const SharedPlanetState = () => {
   const { customData } = useContext(MyContext);
-  let fetchnum = useRef(0);
 
   let [nameVis, setNameVis] = useState("visible");
   let [iconVis, setIconVis] = useState("visible");
@@ -59,7 +58,7 @@ export const SharedPlanetState = () => {
   customData.current["handleReset"] = handleReset;
 
   //set speed (timeinterval between positions 60000ms*speed)
-  const [speed, setSpeed] = useState(1);
+  const [speed, setSpeed] = useState(100);
   const updateSpeed = (newSpeed) => {
     setSpeed(newSpeed);
     setSpeedChanged(true);

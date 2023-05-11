@@ -15,7 +15,7 @@ import { PlanetOverlay } from "./planetOverlay";
 import { PlanetPath } from "./path";
 import { MyContext } from "./Scene3";
 
-export const Jupiter = ({ getPosition, speed }) => {
+export const Jupiter = ({ getPosition, speed, speedChanged }) => {
   const group = useRef();
   const col = useLoader(TextureLoader, "../img/jupiter/jupiter2_4k.jpg");
 
@@ -23,6 +23,7 @@ export const Jupiter = ({ getPosition, speed }) => {
   const lineArr = useRef([]);
 
   let planetPositionIndex = useRef(0);
+  const lastPositionUpdate = useRef(0);
 
   let distanceScaleFactor = 1000000;
 
@@ -32,13 +33,19 @@ export const Jupiter = ({ getPosition, speed }) => {
     group.current.userData.scolor = "yellow";
   });
 
-  useFrame(() => {
+  useFrame(({ clock }) => {
     //getPosition("jupiter", setPosArr, posArr, planetPositionIndex.current);
+    const timeSinceLastUpdate = clock.elapsedTime - lastPositionUpdate.current;
+    if (timeSinceLastUpdate >= 2 || speedChanged) {
+      //console.log("gethis");
+      getPosition("jupiter", setPosArr, posArr, planetPositionIndex.current);
+      lastPositionUpdate.current = clock.elapsedTime;
+    }
 
     //if speed is 0 set the date to current date get from posArr
     //search for current date in posArr an set planetPositionIndex
     if (speed == 0) planetPositionIndex.current = 0;
-    if (false && planetPositionIndex.current < posArr.length) {
+    if (true && planetPositionIndex.current < posArr.length) {
       group.current.position.set(
         Number(
           posArr[planetPositionIndex.current].position.x / distanceScaleFactor
@@ -75,7 +82,7 @@ export const Jupiter = ({ getPosition, speed }) => {
         linePos={lineArr.current}
         planet={group}
         color={"yellow"}
-        lineLength={20}
+        lineLength={400}
       />
       <group ref={group}>
         <PlanetOverlay planet={group} />

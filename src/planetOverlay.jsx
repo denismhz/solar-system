@@ -62,6 +62,8 @@ export const PlanetOverlay = ({ planet }) => {
         case 0:
           controls.current.target.copy(planet.current.position.clone());
           customData.current.showInfo(planet.current.userData);
+          customData.current.handlePosition(planet.current.position);
+          customData.current.handleLookAt(planet.current.position);
           console.log(customData);
           //startFollow();
           break;

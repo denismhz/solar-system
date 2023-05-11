@@ -82,7 +82,7 @@ export const Mars = ({ speed, getPosition, speedChanged }) => {
         linePos={lineArr.current}
         planet={group}
         color={"orange"}
-        lineLength={20}
+        lineLength={150}
       />
       <group ref={group}>
         <PlanetOverlay planet={group} />
