@@ -60,11 +60,14 @@ export const PlanetOverlay = ({ planet }) => {
       // native event
       switch (event.nativeEvent.button) {
         case 0:
-          controls.current.target.copy(planet.current.position.clone());
+          //controls.current.target.copy(planet.current.position.clone());
           customData.current.showInfo(planet.current.userData);
-          customData.current.handlePosition(planet.current.position);
+          customData.current.handlePosition(
+            planet.current.position,
+            planet.current
+          );
           customData.current.handleLookAt(planet.current.position);
-          console.log(customData);
+          //console.log(customData);
           //startFollow();
           break;
         case 2:

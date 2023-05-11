@@ -125,7 +125,7 @@ export const Earth = ({ speed, getPosition, speedChanged }) => {
         linePos={lineArr.current}
         planet={group}
         color={"lightgreen"}
-        lineLength={100}
+        lineLength={300}
       />
       <group ref={group}>
         <PlanetOverlay planet={group} />

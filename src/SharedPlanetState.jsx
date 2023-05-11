@@ -58,7 +58,7 @@ export const SharedPlanetState = () => {
   customData.current["handleReset"] = handleReset;
 
   //set speed (timeinterval between positions 60000ms*speed)
-  const [speed, setSpeed] = useState(100);
+  const [speed, setSpeed] = useState(1);
   const updateSpeed = (newSpeed) => {
     setSpeed(newSpeed);
     setSpeedChanged(true);

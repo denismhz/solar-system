@@ -17,37 +17,21 @@ import { SharedPlanetState } from "./SharedPlanetState.jsx";
 import { Skybox } from "./skybox.jsx";
 import { MyContext } from "./Scene3.jsx";
 
-export const CameraController = () => {
+export function CustomCamera(props) {
   const { customData } = useContext(MyContext);
   const [distance, setDistance] = useState(5);
   const [lookAt, setLookAt] = useState(new THREE.Vector3(0, 0, 0));
   const [position, setPosition] = useState(new THREE.Vector3(0, 0, 200));
   const [animate, setAnimate] = useState(false);
-  const { camera } = useThree();
-  const [currObj, setCurrObj] = useState(undefined);
-  const mycam = useRef();
-  const cameraGroupRef = useRef();
-  const set = useThree(({ set }) => set);
-  const size = useThree(({ size }) => size);
 
-  useLayoutEffect(() => {
-    if (mycam.current) {
-      mycam.current.aspect = size.width / size.height;
-      mycam.current.updateProjectionMatrix();
-    }
-  }, [size]);
+  const [currObj, setCurrObj] = useState(undefined);
 
   const handleLookAt = (pos) => {
     setLookAt(pos);
   };
   customData.current["handleLookAt"] = handleLookAt;
 
-  const handleDistance = (obj) => {
-    setDistance(obj.children[1].geometry.boundingSphere.radius * 1.5);
-  };
-
   const handlePosition = (pos, obj) => {
-    mycam.current.updateMatrixWorld();
     const newPosition = pos
       .clone()
       .add(
@@ -65,11 +49,34 @@ export const CameraController = () => {
   };
   customData.current["handlePosition"] = handlePosition;
 
-  useFrame(() => {
-    console.log(mycam);
-    let rp = undefined;
-    cameraGroupRef.current.position.set(new THREE.Vector3(0, 0, 200));
+  const cameraRef = useRef();
+  const set = useThree(({ set }) => set);
+  const size = useThree(({ size }) => size);
+  const camGroup = useRef();
+
+  useLayoutEffect(() => {
+    if (cameraRef.current) {
+      cameraRef.current.aspect = size.width / size.height;
+      cameraRef.current.updateProjectionMatrix();
+    }
+  }, [size, props]);
+
+  useLayoutEffect(() => {
+    set({ camera: cameraRef.current });
+  }, []);
+
+  let i = 0;
+
+  useFrame(({ clock }) => {
+    cameraRef.current.updateProjectionMatrix();
+    //console.log(cameraRef.current.position);
+    //console.log(camGroup.current.position);
+    //cameraRef.current.position.add(new THREE.Vector3(1, 0, 0));
+    //camGroup.current.position.add(new THREE.Vector3(0, 0, 1));
+    //let rp = undefined;
+    //camGroup.current.position.copy(new THREE.Vector3(0, 0, 600));
     //camera.updateProjectionMatrix();
+    let rp = undefined;
     if (currObj) {
       rp = currObj.position
         .clone()
@@ -87,29 +94,42 @@ export const CameraController = () => {
       //update relative position
 
       setPosition();
-      camera.position.lerp(rp, 0.02);
-      camera.lookAt(lookAt);
+      camGroup.current.position.lerp(currObj.position, 0.02);
+      //set Camera position
+      /*cameraRef.current.position.lerp(
+        new THREE.Vector3(
+          0,
+          0,
+          currObj.children[1].geometry.boundingSphere.radius * 2.5
+        ),
+        0.01
+      );*/
+      cameraRef.current.lookAt(lookAt);
+      cameraRef.current.position.x = Math.cos(i) * 3;
+      cameraRef.current.position.y = Math.sin(2) * 3;
+
+      i += 0.1;
 
       //console.log(currObj);
-      if (camera.position.distanceTo(rp) < 0.1) {
+      if (camGroup.current.position.distanceTo(currObj.position) < 0.1) {
         //camera.quaternion.slerp(currObj.quaternion, 0.2);
-        setAnimate(false);
+        //setAnimate(false);
       }
     }
     //cameraRef.current.position.addScalar(2);
     //camera.position.addScalar(1);
-    //console.log(camera);
+    //console.log(camera);*/
   });
+
   return (
-    <group ref={cameraGroupRef}>
+    <group ref={camGroup} position={[0, 0, 200]}>
       <perspectiveCamera
-        ref={mycam}
-        position={[0, 0, 100]}
+        ref={cameraRef}
+        position={[0, 0, 0]}
         fov={75}
-        aspect={window.innerWidth / window.innerHeight}
         near={0.1}
         far={1000}
       />
     </group>
   );
-};
+}

@@ -1,11 +1,11 @@
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useThree } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import React, { Suspense, useRef, createContext, memo } from "react";
 
 import { ScreenOverlay } from "./omnioverlay.jsx";
 import { SharedPlanetState } from "./SharedPlanetState.jsx";
 import { Skybox } from "./skybox.jsx";
-import { CameraController } from "./CameraControls.jsx";
+import { CustomCamera } from "./customCamera.jsx";
 
 export const MyContext = createContext();
 
@@ -19,18 +19,17 @@ const SolarSystemScene = () => {
         <ScreenOverlay />
         <Suspense fallback={null}>
           <Canvas
-            camera={{
+          /*camera={{
+              position: [0, 0, 100],
               fov: 75,
               near: 0.1,
-              far: 1000000,
-              position: [0, 100, 200],
-            }}
+              far: 1000,
+            }}*/
           >
-            <CameraController />
+            <CustomCamera />
             <Skybox />
             <ambientLight intensity={0.5} />
             <SharedPlanetState />
-            <OrbitControls ref={controls} />
           </Canvas>
         </Suspense>
       </MyContext.Provider>
