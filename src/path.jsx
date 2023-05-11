@@ -91,7 +91,7 @@ export const PlanetPath = ({
   });
   return (
     <>
-      <line ref={lineref} geometry={lineGeometry}>
+      <line ref={lineref} geometry={lineGeometry} frustumCulled={false}>
         <lineBasicMaterial color={color} />
       </line>
     </>

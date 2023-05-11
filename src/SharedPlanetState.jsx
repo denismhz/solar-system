@@ -30,6 +30,7 @@ export const PlanetOverlayContext = createContext();
 
 export const SharedPlanetState = () => {
   const { customData } = useContext(MyContext);
+  let fetchnum = useRef(0);
 
   let [nameVis, setNameVis] = useState("visible");
   let [iconVis, setIconVis] = useState("visible");
@@ -61,25 +62,29 @@ export const SharedPlanetState = () => {
   const [speed, setSpeed] = useState(1);
   const updateSpeed = (newSpeed) => {
     setSpeed(newSpeed);
-    speedChanged.current = true;
+    setSpeedChanged(true);
   };
   customData.current["updateSpeed"] = updateSpeed;
 
   //get position data and reset if necessary
   const dateTime = useRef(new Date(Date.now()));
-  const speedChanged = useRef(false);
+  const [speedChanged, setSpeedChanged] = useState();
 
   const getPositions = (planet, setPosState, oldState, posCounter) => {
     //if speed was changed delete old data an get new data
 
     //???????Why when i set the speed to 0 it doesnt immidiatly stop? good enough for know
-    if (speedChanged.current) {
-      setPosState(oldState.slice(0, posCounter + 10));
-      speedChanged.current = true;
+    if (speedChanged) {
+      //console.log(oldState.length);
+      //console.log(posCounter);
+      setPosState(oldState.slice(0, 500));
+
+      //console.log("here" + speedChanged);
     }
 
-    if (oldState.length - posCounter < 1500 || speedChanged.current) {
-      //console.log("fetch");
+    if (oldState.length - posCounter < 1000 || speedChanged) {
+      //console.log("there" + speedChanged);
+      setSpeedChanged(false);
       if (oldState.length > 0 && speed > 0) {
         dateTime.current = new Date(
           oldState[oldState.length - 1].date
@@ -93,23 +98,32 @@ export const SharedPlanetState = () => {
         );
         let response = await res.json();
         setPosState(oldState.concat(response));
-        speedChanged.current = false;
       };
+
       fetchData();
     }
+    //console.log(oldState.length);
   };
 
   return (
     <>
       <PlanetOverlayContext.Provider value={{ nameVis, iconVis, speed }}>
-        <Earth speed={speed} getPosition={getPositions} />
-        <Mars speed={speed} />
-        <Jupiter speed={speed} />
-        <Saturn speed={speed} />
-        <Mercury speed={speed} />
-        <Venus speed={speed} />
-        <Neptune speed={speed} />
-        <Uranus speed={speed} />
+        <Earth
+          speed={speed}
+          getPosition={getPositions}
+          speedChanged={speedChanged}
+        />
+        <Mars
+          speed={speed}
+          getPosition={getPositions}
+          speedChanged={speedChanged}
+        />
+        <Jupiter speed={speed} getPosition={getPositions} />
+        <Saturn speed={speed} getPosition={getPositions} />
+        <Mercury speed={speed} getPosition={getPositions} />
+        <Venus speed={speed} getPosition={getPositions} />
+        <Neptune speed={speed} getPosition={getPositions} />
+        <Uranus speed={speed} getPosition={getPositions} />
         <Sun />
       </PlanetOverlayContext.Provider>
     </>

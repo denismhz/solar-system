@@ -38,7 +38,7 @@ import { PlanetPath } from "./path";
 import { MyContext } from "./Scene3";
 import { PlanetOverlayContext } from "./SharedPlanetState";
 
-export const Earth = ({ speed, getPosition }) => {
+export const Earth = ({ speed, getPosition, speedChanged }) => {
   let distanceScaleFactor = 1000000;
   const [posArr, setPosArr] = useState([]);
   const lineArr = useRef([]);
@@ -46,7 +46,7 @@ export const Earth = ({ speed, getPosition }) => {
   const clouds = useRef("clouds");
   const earth = useRef();
   const group = useRef();
-  const color = useRef("lightgreen");
+  const { customData } = useContext(MyContext);
 
   let planetPositionIndex = useRef(0);
 
@@ -56,15 +56,25 @@ export const Earth = ({ speed, getPosition }) => {
     group.current.userData.scolor = "lightgreen";
   });
 
-  useFrame(() => {
+  useFrame(({ clock }) => {
+    const timeSinceLastUpdate = clock.elapsedTime - lastPositionUpdate.current;
+    if (timeSinceLastUpdate >= 2 || speedChanged) {
+      //console.log("gethis");
+      getPosition("earth", setPosArr, posArr, planetPositionIndex.current);
+      lastPositionUpdate.current = clock.elapsedTime;
+    }
+    //console.log("arrlength" + posArr.length);
     clouds.current.rotation.y += 0.00025;
     earth.current.rotation.y += 0.00015;
-    getPosition("earth", setPosArr, posArr, planetPositionIndex.current);
 
     //if speed is 0 set the date to current date get from posArr
     //search for current date in posArr an set planetPositionIndex
     if (speed == 0) planetPositionIndex.current = 0;
-    if (true && planetPositionIndex.current < posArr.length) {
+    if (
+      true &&
+      planetPositionIndex.current < posArr.length &&
+      posArr.length > 0
+    ) {
       group.current.position.set(
         Number(
           posArr[planetPositionIndex.current].position.x / distanceScaleFactor
@@ -76,7 +86,7 @@ export const Earth = ({ speed, getPosition }) => {
           posArr[planetPositionIndex.current].position.z / distanceScaleFactor
         )
       );
-      planetPositionIndex.current += Number(speed);
+      planetPositionIndex.current += Number(1);
       lineArr.current.push(
         new THREE.Vector3(
           Number(
@@ -113,7 +123,7 @@ export const Earth = ({ speed, getPosition }) => {
       <PlanetPath
         linePos={lineArr.current}
         planet={group}
-        color={color.current}
+        color={"lightgreen"}
         lineLength={20}
       />
       <group ref={group}>
