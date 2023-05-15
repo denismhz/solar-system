@@ -63,6 +63,7 @@ export const Earth = ({ speed, getPosition, speedChanged }) => {
       //console.log("gethis");
       getPosition("earth", setPosArr, posArr, planetPositionIndex.current);
       lastPositionUpdate.current = clock.elapsedTime;
+      //console.log(group.current);
     }
     //console.log("arrlength" + posArr.length);
     clouds.current.rotation.y += 0.00025;

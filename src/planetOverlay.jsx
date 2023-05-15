@@ -85,7 +85,9 @@ export const PlanetOverlay = ({ planet }) => {
   }, [planet, name, minDistance, customData, iconVis, nameVis]);
 
   useFrame(() => {
-    var distance = camera.position.distanceTo(planet.current.position);
+    let worldpos = new THREE.Vector3();
+    camera.getWorldPosition(worldpos);
+    var distance = worldpos.distanceTo(planet.current.position);
     if (distance < minDistance) {
       setOpacity(0);
     } else {

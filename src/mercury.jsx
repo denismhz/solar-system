@@ -41,6 +41,7 @@ export const Mercury = ({ speed, getPosition, speedChanged }) => {
       //console.log("gethis");
       getPosition("mercury", setPosArr, posArr, planetPositionIndex.current);
       lastPositionUpdate.current = clock.elapsedTime;
+      //console.log(group.current);
     }
 
     //if speed is 0 set the date to current date get from posArr
