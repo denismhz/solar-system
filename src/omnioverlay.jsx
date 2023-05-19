@@ -30,7 +30,7 @@ export const ScreenOverlay = () => {
 
   return (
     <>
-      <div className="slidecontainer">
+      {/* <div className="slidecontainer">
         <input
           type="range"
           min="30"
@@ -39,9 +39,36 @@ export const ScreenOverlay = () => {
           className="slider"
           id="myRange"
           onChange={handleChange}
-        />
-        <button onClick={handleReset}>Reset</button>
-        <button onClick={handlePlanetOverlayVisibility}>Hide things</button>
+        /> */}
+      <div className="btn-toolbar slidecontainer">
+        <div className="btn-group mr-2" role="group">
+          <button onClick={handleReset} className="btn btn-primary">
+            &lt;
+          </button>
+          <button onClick={handleReset} className="btn btn-primary">
+            &gt;
+          </button>
+          <button
+            onClick={handlePlanetOverlayVisibility}
+            className="btn btn-primary"
+          >
+            &gt;&gt;
+          </button>
+          <button
+            onClick={handlePlanetOverlayVisibility}
+            className="btn btn-primary"
+          >
+            &gt;&gt;&gt;
+          </button>
+        </div>
+        <div className="btn-group" role="group">
+          <button
+            onClick={handlePlanetOverlayVisibility}
+            className="btn btn-primary"
+          >
+            O
+          </button>
+        </div>
       </div>
       <PlanetInfo />
     </>

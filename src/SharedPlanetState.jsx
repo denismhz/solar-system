@@ -28,26 +28,24 @@ import { MyContext } from "./Scene3.jsx";
 
 export const PlanetOverlayContext = createContext();
 
+import { Planet } from "./planet.jsx";
+
 export const SharedPlanetState = () => {
   const { customData } = useContext(MyContext);
 
   let [nameVis, setNameVis] = useState("visible");
   let [iconVis, setIconVis] = useState("visible");
 
+  const lastPositionUpdate = useRef(0);
+
   const handleVisibility = () => {
     if (nameVis == "visible" && iconVis == "visible") {
       setNameVis("hidden");
-      console.log(nameVis);
-      console.log("hiding names");
     } else if (nameVis == "hidden" && iconVis == "visible") {
       setIconVis("hidden");
-      console.log(nameVis);
-      console.log("hiding icons");
     } else if (nameVis == "hidden" && iconVis == "hidden") {
       setIconVis("visible");
       setNameVis("visible");
-      console.log(nameVis);
-      console.log("showing everything");
     }
   };
   customData.current["handleVisibility"] = handleVisibility;
@@ -58,7 +56,7 @@ export const SharedPlanetState = () => {
   customData.current["handleReset"] = handleReset;
 
   //set speed (timeinterval between positions 60000ms*speed)
-  const [speed, setSpeed] = useState(1);
+  const [speed, setSpeed] = useState(60);
   const updateSpeed = (newSpeed) => {
     setSpeed(newSpeed);
     setSpeedChanged(true);
@@ -103,6 +101,42 @@ export const SharedPlanetState = () => {
     }
     //console.log(oldState.length);
   };
+
+  const dataRef = useRef(null);
+  const loadingRef = useRef(false);
+  const errRef = useRef(null);
+
+  useFrame(({ clock }) => {
+    const fetchData = async () => {
+      fetch(`http://127.0.0.1:8000/duration`).then((response) => {
+        if (!response.ok) {
+          throw new Error(
+            `This is an HTTP error: The status is ${response.status}`
+          );
+        }
+        loadingRef.current = true;
+        response
+          .json()
+          .then((data) => {
+            dataRef.current = data;
+            errRef.current = null;
+          })
+          .catch((err) => {
+            dataRef.current = null;
+            errRef.current = err.message;
+          })
+          .finally(() => {
+            loadingRef.current = false;
+          });
+      });
+    };
+    const timeSinceLastUpdate = clock.elapsedTime - lastPositionUpdate.current;
+    if (timeSinceLastUpdate >= 5) {
+      fetchData();
+      console.log(dataRef.current);
+      lastPositionUpdate.current = clock.elapsedTime;
+    }
+  });
 
   return (
     <>

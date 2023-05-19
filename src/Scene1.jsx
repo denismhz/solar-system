@@ -130,7 +130,7 @@ const WaveShaderMaterial = shaderMaterial(
   varying vec2 vUv;
 
   void main(){
-    gl_FragColor = vec4(cos(vUv.x + uTime*2.0) * uColor, 1.0);
+    gl_FragColor = vec4(cos(vUv.x - uTime*2.0) * uColor, 1.0);
   }`
 );
 

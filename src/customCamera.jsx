@@ -31,10 +31,10 @@ export function CustomCamera(props) {
   const mouseUp = useRef(false);
   let _mouseStart = useRef(new THREE.Vector2(0, 0));
   let _mouseEnd = useRef(new THREE.Vector2(0, 0));
-  let distance = useRef(0);
+  let distance = useRef(200);
 
   const [currObj, setCurrObj] = useState(undefined);
-  let rotate = useRef(false);
+  let rotate = useRef(true);
 
   const handleMouseWheel = (event) => {
     const delta = Math.sign(event.deltaY);
@@ -47,7 +47,7 @@ export function CustomCamera(props) {
       const deltaX = event.movementX;
       const deltaY = event.movementY;
 
-      const rotationSpeed = 0.01;
+      const rotationSpeed = 0.005;
 
       // Create quaternions for rotation around X and Y axes
       const quaternionX = new THREE.Quaternion().setFromAxisAngle(
@@ -63,7 +63,8 @@ export function CustomCamera(props) {
       const deltaQuaternion = quaternionY.multiply(quaternionX);
 
       // Apply the rotation to the camera quaternion
-      camGroup.current.quaternion.multiply(deltaQuaternion);
+      if (camGroup.current.quaternion)
+        camGroup.current.quaternion.multiply(deltaQuaternion);
     }
   };
 
@@ -84,10 +85,17 @@ export function CustomCamera(props) {
   customData.current["handleLookAt"] = handleLookAt;
 
   const handleZoom = (delta) => {
-    const zoomSpeed = 0.1;
+    let zoomSpeed = 0.01;
+    if (camGroup && cameraRef) {
+      zoomSpeed *= cameraRef.current.position.distanceTo(
+        camGroup.current.position
+      );
+      console.log("asdasd");
+    }
+
     function newDistance(prevDistance) {
       const newDistance = prevDistance + delta * zoomSpeed;
-      return Math.max(1, newDistance); // Adjust the minimum distance as needed
+      return Math.max(0, newDistance); // Adjust the minimum distance as needed
     }
     distance.current = newDistance(distance.current);
     console.log(distance);
@@ -113,7 +121,7 @@ export function CustomCamera(props) {
       cameraRef.current.aspect = size.width / size.height;
       cameraRef.current.updateProjectionMatrix();
     }
-    cameraRef.current.position.copy(new THREE.Vector3(0, 0, 1000));
+    cameraRef.current.position.copy(new THREE.Vector3(0, 0, 400));
     window.addEventListener("mousedown", handleMouseDown);
     window.addEventListener("mouseup", handleMouseUp);
     window.addEventListener("mousemove", handleMouseMove);
@@ -124,39 +132,49 @@ export function CustomCamera(props) {
     set({ camera: cameraRef.current });
   });
 
+  let lerpedilerp = useRef(0.01);
+
   useFrame(({ clock }) => {
     cameraRef.current.updateProjectionMatrix();
 
     if (animate && currObj) {
       distance.current =
         currObj.children[1].geometry.boundingSphere.radius * 2.5;
-      camGroup.current.position.lerp(currObj.position, 0.02);
+      camGroup.current.position.lerp(currObj.position, lerpedilerp.current);
       cameraRef.current.position.lerp(
         new THREE.Vector3(
           0,
           0,
           currObj.children[1].geometry.boundingSphere.radius * 2.5
         ),
-        0.02
+        lerpedilerp.current
       );
 
       cameraRef.current.lookAt(currObj.position);
 
       rotate.current = false;
+      lerpedilerp.current *= 1.1;
+      console.log(camGroup.current.position.distanceTo(currObj.position));
 
-      if (camGroup.current.position.distanceTo(currObj.position) < 0.2) {
+      if (camGroup.current.position.distanceTo(currObj.position) < 0.1) {
         currObj.add(camGroup.current);
         camGroup.current.position.copy(new THREE.Vector3(0, 0, 0), 0.2);
         rotate.current = true;
         setAnimate(false);
       }
     }
-    if (rotate.current) {
+    if (rotate.current && currObj) {
       /*       cameraRef.current.quaternion.multiply(lastQ.current); */
       //camGroup.current.rotation.x += 0.005;
-      cameraRef.current.position.copy(
-        new THREE.Vector3(0, 0, distance.current)
-      );
+      lerpedilerp.current = 0.01;
+      if (
+        distance.current >
+        currObj.children[1].geometry.boundingSphere.radius * 2.5
+      ) {
+        cameraRef.current.position.copy(
+          new THREE.Vector3(0, 0, distance.current)
+        );
+      }
     }
   });
 
