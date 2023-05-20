@@ -41,67 +41,70 @@ import { PlanetOverlayContext } from "./SharedPlanetState";
 export const Planet = (props) => {
   const distanceScaleFactor = 1000000;
   //These are the props i need
-  let posArr = props.posArr;
-  console.log(props.posArr);
+  let allPosArr = useRef([]);
+
   let speed = props.speed;
   const lineArr = useRef([]);
   const line = useRef();
   const clouds = useRef("clouds");
   const earth = useRef();
   const group = useRef();
-  const first = useRef(true);
-  const lastPositionUpdate = useRef(0);
 
+  //let planetPositionIndex = props.planetPosIndex;
   let planetPositionIndex = useRef(0);
 
   useLayoutEffect(() => {
-    group.current.userData.name = "Earth";
-    group.current.userData.nearOvOp = 60;
-    group.current.userData.scolor = "lightgreen";
+    group.current.userData.name = props.planetData.name;
+    group.current.userData.nearOvOp = props.planetData.nearOvOp;
+    group.current.userData.scolor = props.planetData.scolor;
   });
 
-  useFrame(({ clock }) => {
-    const timeSinceLastUpdate = clock.elapsedTime - lastPositionUpdate.current;
-    if (timeSinceLastUpdate >= 2 || speedChanged) {
-      //console.log("gethis");
-      getPosition("earth", setPosArr, posArr, planetPositionIndex.current);
-      lastPositionUpdate.current = clock.elapsedTime;
-      //console.log(group.current);
-    }
+  useEffect(() => {
+    allPosArr.current = allPosArr.current.concat(props.posArr);
+  });
+
+  useFrame(() => {
+    //console.log(allPosArr.current.length);
     //console.log("arrlength" + posArr.length);
     clouds.current.rotation.y += 0.00025;
     earth.current.rotation.y += 0.00015;
 
     //if speed is 0 set the date to current date get from posArr
-    //search for current date in posArr an set planetPositionIndex
-    if (speed == 0) planetPositionIndex.current = 0;
+    //search for current date in posArr and set planetPositionIndex
+
+    //if speed > 0 update positions
     if (
       true &&
-      planetPositionIndex.current < posArr.length &&
-      posArr.length > 0
+      planetPositionIndex.current < allPosArr.current.length &&
+      allPosArr.current.length > 0 &&
+      speed > 0
     ) {
+      console.log("herer");
       group.current.position.set(
         Number(
-          posArr[planetPositionIndex.current].position.x / distanceScaleFactor
+          allPosArr.current[planetPositionIndex.current].x / distanceScaleFactor
         ),
         Number(
-          posArr[planetPositionIndex.current].position.y / distanceScaleFactor
+          allPosArr.current[planetPositionIndex.current].y / distanceScaleFactor
         ),
         Number(
-          posArr[planetPositionIndex.current].position.z / distanceScaleFactor
+          allPosArr.current[planetPositionIndex.current].z / distanceScaleFactor
         )
       );
-      planetPositionIndex.current += Number(1);
+      if (speed > 0) planetPositionIndex.current += Number(1);
       lineArr.current.push(
         new THREE.Vector3(
           Number(
-            posArr[planetPositionIndex.current].position.x / distanceScaleFactor
+            allPosArr.current[planetPositionIndex.current].x /
+              distanceScaleFactor
           ),
           Number(
-            posArr[planetPositionIndex.current].position.y / distanceScaleFactor
+            allPosArr.current[planetPositionIndex.current].y /
+              distanceScaleFactor
           ),
           Number(
-            posArr[planetPositionIndex.current].position.z / distanceScaleFactor
+            allPosArr.current[planetPositionIndex.current].z /
+              distanceScaleFactor
           )
         )
       );
@@ -127,7 +130,6 @@ export const Planet = (props) => {
     <>
       <PlanetPath
         linePos={lineArr.current}
-        planet={group}
         color={"lightgreen"}
         lineLength={300}
       />
