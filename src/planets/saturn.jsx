@@ -1,18 +1,11 @@
-import { Canvas, extend, useFrame, useLoader } from "@react-three/fiber";
-import { shaderMaterial, OrbitControls, Line } from "@react-three/drei";
-import React, {
-  useRef,
-  Suspense,
-  useLayoutEffect,
-  useState,
-  useContext,
-} from "react";
+import { extend, useFrame, useLoader } from "@react-three/fiber";
+import { shaderMaterial } from "@react-three/drei";
+import React, { useRef, useLayoutEffect, useState } from "react";
 import * as THREE from "three";
 import glsl from "glslify";
 import { TextureLoader } from "three/src/loaders/TextureLoader";
-import { PlanetOverlay } from "./planetOverlay";
-import { PlanetPath } from "./path";
-import { MyContext } from "./Scene3";
+import { PlanetOverlay } from "../planetOverlay";
+import { PlanetPath } from "../path";
 
 const SaturnRingMaterial = shaderMaterial(
   {
@@ -59,8 +52,14 @@ void main() {
 
 extend({ SaturnRingMaterial });
 
-export const Saturn = ({ speed, speedChanged, getPosition }) => {
-  const [posArr, setPosArr] = useState([]);
+export const Saturn = ({
+  speed,
+  speedChanged,
+  getPosition,
+  setPosition,
+  data,
+}) => {
+  const [posArr, setPosArr] = useState(data);
   const lineArr = useRef([]);
   const lastPositionUpdate = useRef(0);
 
@@ -84,7 +83,7 @@ export const Saturn = ({ speed, speedChanged, getPosition }) => {
 
   useFrame(({ clock }) => {
     const timeSinceLastUpdate = clock.elapsedTime - lastPositionUpdate.current;
-    if (timeSinceLastUpdate >= 2 || speedChanged) {
+    if (timeSinceLastUpdate >= 2) {
       //console.log("gethis");
       getPosition("saturn", setPosArr, posArr, planetPositionIndex.current);
       lastPositionUpdate.current = clock.elapsedTime;
@@ -93,38 +92,7 @@ export const Saturn = ({ speed, speedChanged, getPosition }) => {
 
     //if speed is 0 set the date to current date get from posArr
     //search for current date in posArr an set planetPositionIndex
-    if (speed == 0) planetPositionIndex.current = 0;
-    if (
-      true &&
-      planetPositionIndex.current < posArr.length &&
-      posArr.length > 0
-    ) {
-      group.current.position.set(
-        Number(
-          posArr[planetPositionIndex.current].position.x / distanceScaleFactor
-        ),
-        Number(
-          posArr[planetPositionIndex.current].position.y / distanceScaleFactor
-        ),
-        Number(
-          posArr[planetPositionIndex.current].position.z / distanceScaleFactor
-        )
-      );
-      planetPositionIndex.current += Number(1);
-      lineArr.current.push(
-        new THREE.Vector3(
-          Number(
-            posArr[planetPositionIndex.current].position.x / distanceScaleFactor
-          ),
-          Number(
-            posArr[planetPositionIndex.current].position.y / distanceScaleFactor
-          ),
-          Number(
-            posArr[planetPositionIndex.current].position.z / distanceScaleFactor
-          )
-        )
-      );
-    }
+    setPosition(group, posArr, lineArr);
   }, []);
 
   return (

@@ -25,7 +25,7 @@ import React, {
 import { useNavigate } from "react-router-dom";
 import * as THREE from "three";
 import { MyContext } from "./Scene3";
-import saturnImage from "./saturn.jpg";
+import saturnImage from "./planet_overlay_img/saturn.jpg";
 
 import "./styles.css";
 
@@ -38,9 +38,17 @@ export const PlanetInfo = memo(
     const { customData } = useContext(MyContext);
     const [planetData, setPlanetData] = useState({ name: "Default" });
 
+    function getPlanetDataAtName() {}
+
     useEffect(() => {
+      console.log(props.planetInfo);
       const showInfo = (planet) => {
-        if (planet && planet.name) setPlanetData({ name: planet.name });
+        props.planetInfo.forEach((oplanet) => {
+          if (planet.name == oplanet.name) {
+            setPlanetData(oplanet);
+          }
+        });
+        //if (planet && planet.name) setPlanetData({ name: planet.name });
         console.log(planetData);
         setVisibility("visible");
       };
@@ -56,18 +64,50 @@ export const PlanetInfo = memo(
     }
 
     return (
-      <div className="planetInfo" style={{ visibility: visibility }}>
+      <div
+        className={visibility == "visible" ? "planetInfo" : "planetInfoFadeIn"}
+        style={{ visibility: visibility }}
+      >
         <div className="wrapper">
+          <button
+            type="button"
+            className="btn-close"
+            aria-label="Close"
+            onClick={closeInfo}
+          >
+            X
+          </button>
           <h1>{planetData.name}</h1>
           <img src={saturnImage}></img>
-          <p>
-            Adorned with a dazzling, complex system of icy rings, Saturn is
-            unique in our solar system. The other giant planets have rings, but
-            none are as spectacular as Saturn's.
-          </p>
-          <button type="button" onClick={closeInfo}>
-            Visit
-          </button>
+          <p>{planetData.Description}</p>
+          <div className="data-wrapper">
+            <div className="data">
+              <span style={{ color: planetData.color }} className="data-1">
+                {planetData.LOY}
+              </span>
+              <span className="data-2">Earth Days/Years</span>
+            </div>
+            <div className="data">
+              <span style={{ color: planetData.color }} className="data-1">
+                {planetData.DFS}
+              </span>
+              <span className="data-2">AU</span>
+              <span className="data-3">Distance from Sun</span>
+            </div>
+            <div className="data">
+              <span style={{ color: planetData.color }} className="data-1">
+                {planetData.Moons}
+              </span>
+              <span className="data-2">Moons</span>
+            </div>
+            <div className="data">
+              <span style={{ color: planetData.color }} className="data-1">
+                {planetData.Radius}
+              </span>
+              <span className="data-2">Radius</span>
+              <span className="data-3">Kilometers</span>
+            </div>
+          </div>
         </div>
       </div>
     );

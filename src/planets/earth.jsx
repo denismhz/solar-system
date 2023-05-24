@@ -1,46 +1,24 @@
-import {
-  Canvas,
-  extend,
-  useFrame,
-  useLoader,
-  useThree,
-} from "@react-three/fiber";
-import {
-  shaderMaterial,
-  OrbitControls,
-  Line,
-  Html,
-  Text,
-} from "@react-three/drei";
-import React, {
-  useRef,
-  Suspense,
-  useLayoutEffect,
-  useState,
-  useEffect,
-  useContext,
-} from "react";
+import { useFrame, useLoader } from "@react-three/fiber";
+import React, { useRef, useLayoutEffect, useState, useEffect } from "react";
 import * as THREE from "three";
-import glsl from "glslify";
+
 import { TextureLoader } from "three/src/loaders/TextureLoader";
-import {
-  Selection,
-  Select,
-  EffectComposer,
-  Outline,
-  Scanline,
-} from "@react-three/postprocessing";
-import "./styles.css";
 
-import { PlanetOverlay } from "./planetOverlay";
-import { PlanetInfo } from "./planetInfo";
-import { PlanetPath } from "./path";
-import { MyContext } from "./Scene3";
-import { PlanetOverlayContext } from "./SharedPlanetState";
+import "../styles.css";
 
-export const Earth = ({ speed, getPosition, speedChanged }) => {
+import { PlanetOverlay } from "../planetOverlay";
+
+import { PlanetPath } from "../path";
+
+export const Earth = ({
+  speed,
+  getPosition,
+  speedChanged,
+  data,
+  setPosition,
+}) => {
   let distanceScaleFactor = 1000000;
-  const [posArr, setPosArr] = useState([]);
+  const [posArr, setPosArr] = useState(data);
   const lineArr = useRef([]);
   const line = useRef();
   const clouds = useRef("clouds");
@@ -57,52 +35,24 @@ export const Earth = ({ speed, getPosition, speedChanged }) => {
     group.current.userData.scolor = "lightgreen";
   });
 
+  useEffect(() => {}, []);
   useFrame(({ clock }) => {
     const timeSinceLastUpdate = clock.elapsedTime - lastPositionUpdate.current;
-    if (timeSinceLastUpdate >= 2 || speedChanged) {
+    if (timeSinceLastUpdate >= 3) {
       //console.log("gethis");
-      getPosition("earth", setPosArr, posArr, planetPositionIndex.current);
+      getPosition("earth", setPosArr, posArr);
       lastPositionUpdate.current = clock.elapsedTime;
+      //console.log(posArr);
       //console.log(group.current);
     }
     //console.log("arrlength" + posArr.length);
     clouds.current.rotation.y += 0.00025;
     earth.current.rotation.y += 0.00015;
 
+    if (posArr) setPosition(group, posArr, lineArr);
+
     //if speed is 0 set the date to current date get from posArr
     //search for current date in posArr an set planetPositionIndex
-    if (speed == 0) planetPositionIndex.current = 0;
-    if (
-      true &&
-      planetPositionIndex.current < posArr.length &&
-      posArr.length > 0
-    ) {
-      group.current.position.set(
-        Number(
-          posArr[planetPositionIndex.current].position.x / distanceScaleFactor
-        ),
-        Number(
-          posArr[planetPositionIndex.current].position.y / distanceScaleFactor
-        ),
-        Number(
-          posArr[planetPositionIndex.current].position.z / distanceScaleFactor
-        )
-      );
-      planetPositionIndex.current += Number(1);
-      lineArr.current.push(
-        new THREE.Vector3(
-          Number(
-            posArr[planetPositionIndex.current].position.x / distanceScaleFactor
-          ),
-          Number(
-            posArr[planetPositionIndex.current].position.y / distanceScaleFactor
-          ),
-          Number(
-            posArr[planetPositionIndex.current].position.z / distanceScaleFactor
-          )
-        )
-      );
-    }
   }, []);
 
   const col = useLoader(TextureLoader, "../img/earth/6k_earth_daymap.jpg");
@@ -145,15 +95,17 @@ export const Earth = ({ speed, getPosition, speedChanged }) => {
           <sphereGeometry args={[6371.0 / 6000 + 0.01, 50, 50]} />
           <meshPhongMaterial map={cloudMap} transparent={true} opacity={0.5} />
         </mesh>
-        <line ref={line}>
-          <bufferGeometry />
-          <lineBasicMaterial
-            color={"hotpink"}
-            transparent={true}
-            opacity={0.5}
-            linewidth={2}
-          />
-        </line>
+        {true && (
+          <line ref={line}>
+            <bufferGeometry />
+            <lineBasicMaterial
+              color={"hotpink"}
+              transparent={true}
+              opacity={0.5}
+              linewidth={2}
+            />
+          </line>
+        )}
       </group>
     </>
   );

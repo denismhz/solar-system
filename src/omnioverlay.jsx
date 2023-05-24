@@ -11,21 +11,27 @@ import React, {
 import { PlanetInfo } from "./planetInfo.jsx";
 import { MyContext } from "./Scene3.jsx";
 
-export const ScreenOverlay = () => {
+export const ScreenOverlay = (props) => {
   const { customData } = useContext(MyContext);
 
-  const handleChange = (event) => {
-    customData.current.updateSpeed(event.target.value);
+  const handleChange = () => {
+    customData.current.updateSpeed(0);
+  };
+
+  const handleChange0 = () => {
+    customData.current.updateSpeed(1);
+  };
+
+  const handleChange1 = () => {
+    customData.current.updateSpeed(3);
   };
 
   const handleReset = () => {
     customData.current.handleReset();
-    console.log("reset");
   };
 
   const handlePlanetOverlayVisibility = () => {
     customData.current.handleVisibility();
-    console.log("asd");
   };
 
   return (
@@ -45,20 +51,14 @@ export const ScreenOverlay = () => {
           <button onClick={handleReset} className="btn btn-primary">
             &lt;
           </button>
-          <button onClick={handleReset} className="btn btn-primary">
+          <button onClick={handleChange} className="btn btn-primary">
+            II
+          </button>
+          <button onClick={handleChange0} className="btn btn-primary">
             &gt;
           </button>
-          <button
-            onClick={handlePlanetOverlayVisibility}
-            className="btn btn-primary"
-          >
+          <button onClick={handleChange1} className="btn btn-primary">
             &gt;&gt;
-          </button>
-          <button
-            onClick={handlePlanetOverlayVisibility}
-            className="btn btn-primary"
-          >
-            &gt;&gt;&gt;
           </button>
         </div>
         <div className="btn-group" role="group">
@@ -70,7 +70,7 @@ export const ScreenOverlay = () => {
           </button>
         </div>
       </div>
-      <PlanetInfo />
+      <PlanetInfo planetInfo={props.planetInfo} />
     </>
   );
 };

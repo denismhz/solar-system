@@ -1,26 +1,20 @@
-import {
-  Canvas,
-  extend,
-  useFrame,
-  useLoader,
-  useThree,
-} from "@react-three/fiber";
-import React, {
-  useRef,
-  Suspense,
-  useLayoutEffect,
-  useState,
-  useEffect,
-} from "react";
+import { useFrame, useLoader } from "@react-three/fiber";
+import React, { useRef, useLayoutEffect, useState } from "react";
 import * as THREE from "three";
 import { TextureLoader } from "three/src/loaders/TextureLoader";
-import "./styles.css";
+import "../styles.css";
 
-import { PlanetOverlay } from "./planetOverlay";
-import { PlanetPath } from "./path";
+import { PlanetOverlay } from "../planetOverlay";
+import { PlanetPath } from "../path";
 
-export const Mercury = ({ speed, getPosition, speedChanged }) => {
-  const [posArr, setPosArr] = useState([]);
+export const Mercury = ({
+  speed,
+  getPosition,
+  speedChanged,
+  setPosition,
+  data,
+}) => {
+  const [posArr, setPosArr] = useState(data);
   const lineArr = useRef([]);
   let planetPositionIndex = useRef(0);
   let distanceScaleFactor = 1000000;
@@ -37,7 +31,7 @@ export const Mercury = ({ speed, getPosition, speedChanged }) => {
   useFrame(({ clock }) => {
     //getPosition("mercury", setPosArr, posArr, planetPositionIndex.current);
     const timeSinceLastUpdate = clock.elapsedTime - lastPositionUpdate.current;
-    if (timeSinceLastUpdate >= 2 || speedChanged) {
+    if (timeSinceLastUpdate >= 2) {
       //console.log("gethis");
       getPosition("mercury", setPosArr, posArr, planetPositionIndex.current);
       lastPositionUpdate.current = clock.elapsedTime;
@@ -46,34 +40,7 @@ export const Mercury = ({ speed, getPosition, speedChanged }) => {
 
     //if speed is 0 set the date to current date get from posArr
     //search for current date in posArr an set planetPositionIndex
-    if (speed == 0) planetPositionIndex.current = 0;
-    if (true && planetPositionIndex.current < posArr.length) {
-      group.current.position.set(
-        Number(
-          posArr[planetPositionIndex.current].position.x / distanceScaleFactor
-        ),
-        Number(
-          posArr[planetPositionIndex.current].position.y / distanceScaleFactor
-        ),
-        Number(
-          posArr[planetPositionIndex.current].position.z / distanceScaleFactor
-        )
-      );
-      planetPositionIndex.current += Number(1);
-      lineArr.current.push(
-        new THREE.Vector3(
-          Number(
-            posArr[planetPositionIndex.current].position.x / distanceScaleFactor
-          ),
-          Number(
-            posArr[planetPositionIndex.current].position.y / distanceScaleFactor
-          ),
-          Number(
-            posArr[planetPositionIndex.current].position.z / distanceScaleFactor
-          )
-        )
-      );
-    }
+    setPosition(group, posArr, lineArr);
   }, []);
   const col = useLoader(TextureLoader, "../img/mercury/mercurymap.jpg");
   const bump = useLoader(TextureLoader, "../img/mercury/mercurybump.jpg");

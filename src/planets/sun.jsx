@@ -4,7 +4,7 @@ import React, { useRef, Suspense, useLayoutEffect } from "react";
 import * as THREE from "three";
 import glsl from "glslify";
 import { TextureLoader } from "three/src/loaders/TextureLoader";
-import { PlanetOverlay } from "./planetOverlay";
+import { PlanetOverlay } from "../planetOverlay";
 
 export const Sun = ({ positions }) => {
   const mars = useRef("mars");

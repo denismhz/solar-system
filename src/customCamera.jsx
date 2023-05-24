@@ -90,7 +90,7 @@ export function CustomCamera(props) {
       zoomSpeed *= cameraRef.current.position.distanceTo(
         camGroup.current.position
       );
-      console.log("asdasd");
+      //console.log("asdasd");
     }
 
     function newDistance(prevDistance) {
@@ -98,7 +98,7 @@ export function CustomCamera(props) {
       return Math.max(0, newDistance); // Adjust the minimum distance as needed
     }
     distance.current = newDistance(distance.current);
-    console.log(distance);
+    //console.log(distance);
   };
   customData.current["handleZoom"] = handleZoom;
 
@@ -154,7 +154,7 @@ export function CustomCamera(props) {
 
       rotate.current = false;
       lerpedilerp.current *= 1.1;
-      console.log(camGroup.current.position.distanceTo(currObj.position));
+      //console.log(camGroup.current.position.distanceTo(currObj.position));
 
       if (camGroup.current.position.distanceTo(currObj.position) < 0.1) {
         currObj.add(camGroup.current);
