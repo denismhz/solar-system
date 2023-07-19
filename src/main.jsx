@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Scene from "./Scene1";
 import Scene1 from "./Scene2";
+import Scene4 from "./Scene4"
 import SolarSystemScene from "./Scene3";
 import Smemo from "./Scene3";
 import React, { useEffect, useReducer, useState, useRef } from "react";
@@ -14,6 +15,7 @@ const App = () => {
         <Route path="next" element={<Scene1 />} />
         <Route path="solarsystem" element={<Smemo />} />
         <Route path="sun" element={<SunScene />} />
+        <Route path="planet" element={<Scene4 />} />
       </Routes>
     </BrowserRouter>
   );

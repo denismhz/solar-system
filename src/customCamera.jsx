@@ -38,6 +38,7 @@ export function CustomCamera(props) {
 
   const handleMouseWheel = (event) => {
     const delta = Math.sign(event.deltaY);
+    console.log(delta)
     handleZoom(delta);
   };
 
@@ -85,19 +86,21 @@ export function CustomCamera(props) {
   customData.current["handleLookAt"] = handleLookAt;
 
   const handleZoom = (delta) => {
-    let zoomSpeed = 0.01;
+    let zoomSpeed = 0.03;
     if (camGroup && cameraRef) {
       zoomSpeed *= cameraRef.current.position.distanceTo(
         camGroup.current.position
       );
-      //console.log("asdasd");
     }
+
+    console.log(currObj)
 
     function newDistance(prevDistance) {
       const newDistance = prevDistance + delta * zoomSpeed;
       return Math.max(0, newDistance); // Adjust the minimum distance as needed
     }
     distance.current = newDistance(distance.current);
+    console.log("asdasd")
     //console.log(distance);
   };
   customData.current["handleZoom"] = handleZoom;
@@ -156,7 +159,7 @@ export function CustomCamera(props) {
       lerpedilerp.current *= 1.1;
       //console.log(camGroup.current.position.distanceTo(currObj.position));
 
-      if (camGroup.current.position.distanceTo(currObj.position) < 0.1) {
+      if (camGroup.current.position.distanceTo(currObj.position) < 0.2) {
         currObj.add(camGroup.current);
         camGroup.current.position.copy(new THREE.Vector3(0, 0, 0), 0.2);
         rotate.current = true;
