@@ -1,80 +1,71 @@
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
-import React, {
-  Suspense,
-  useState,
-  useEffect,
-  useRef,
-  createContext,
-  useContext,
-  forwardRef,
-  memo,
-  useMemo,
-} from "react";
-import { Earth } from "./planets/earth.jsx";
-import { Mars } from "./planets/mars.jsx";
-import { Jupiter } from "./planets/jupiter.jsx";
-import { Saturn } from "./planets/saturn.jsx";
-import { Mercury } from "./planets/mercury.jsx";
-import { Venus } from "./planets/venus.jsx";
-import { Neptune } from "./planets/neptune.jsx";
-import { Uranus } from "./planets/uranus.jsx";
-import { Sun } from "./planets/sun.jsx";
+import { useFrame } from "@react-three/fiber";
+import { Html } from "@react-three/drei";
+import { useState, useRef, createContext, useContext } from "react";
 import * as THREE from "three";
-import { PlanetInfo } from "./planetInfo.jsx";
-import { Skybox } from "./skybox.jsx";
-import { ReactPropTypes } from "react";
-import { MyContext } from "./Scene3.jsx";
+import { MyContext } from "./SolarSystemMain.jsx";
+import Planet from "./planets/planet.jsx";
+import Sun from "./planets/sun.jsx";
+import PropTypes from "prop-types";
 
 export const PlanetOverlayContext = createContext();
 
-import { Planet } from "./planet.jsx";
-
-export const SharedPlanetState = ({ initialData }) => {
+export const SharedPlanetState = ({ planetData, linePos }) => {
   const distanceScaleFactor = 1000000;
   const { customData } = useContext(MyContext);
 
-  const lastGetRequestRef = useRef(0);
-  const currentPosIndexRef = useRef(0);
-  const getNewDataThresholdRef = 5000;
-  const currentSpeedRef = useRef(0);
+  const [loading, setLoading] = useState(true);
+  const [positions, setPositions] = useState(null);
+  const [realPos, setRealPos] = useState(null);
+  let first = useRef(true);
+
   const planetPositionIndex = useRef(0);
+  const lastPositionUpdate = useRef(0);
+  const lastRealPositionUpdate = useRef(0);
 
   let [nameVis, setNameVis] = useState("visible");
   let [iconVis, setIconVis] = useState("visible");
+  let [pathVis, setPathVis] = useState("visible");
 
   const handleVisibility = () => {
-    if (nameVis == "visible" && iconVis == "visible") {
+    if (nameVis == "visible" && iconVis == "visible" && pathVis == "visible") {
       setNameVis("hidden");
-    } else if (nameVis == "hidden" && iconVis == "visible") {
+    } else if (nameVis == "hidden" && iconVis == "visible" && pathVis == "visible") {
       setIconVis("hidden");
-    } else if (nameVis == "hidden" && iconVis == "hidden") {
+    } else if (nameVis == "hidden" && iconVis == "hidden" && pathVis == "visible") {
+      setPathVis("hidden")
+    } else if(nameVis == "hidden" && iconVis == "hidden" && pathVis == "hidden"){
       setIconVis("visible");
       setNameVis("visible");
+      setPathVis("visible")
     }
   };
   customData.current["handleVisibility"] = handleVisibility;
 
   const handleReset = () => {
     setSpeed(-1);
+    console.log("reset");
+    planetPositionIndex.current = 0;
+    lastRealPositionUpdate.current = 0;
+    getRealTimePos();
   };
   customData.current["handleReset"] = handleReset;
 
   //set speed (timeinterval between positions 60000ms*speed)
-  const [speed, setSpeed] = useState(1);
+  const [speed, setSpeed] = useState(-1);
   const updateSpeed = (newSpeed) => {
     setSpeed(newSpeed);
-    setSpeedChanged(true);
-    console.log(speed);
   };
   customData.current["updateSpeed"] = updateSpeed;
 
   //get position data and reset if necessary
   const dateTime = useRef(new Date(Date.now()));
-  const [speedChanged, setSpeedChanged] = useState();
 
-  function updatePlanetPosition(group, posArr, lineArr) {
-    if (true && planetPositionIndex.current < posArr.length) {
+  function updatePlanetPosition(group, posArr, lineArr, realPos) {
+    if (
+      !loading &&
+      planetPositionIndex.current < posArr.length &&
+      speed != -1
+    ) {
       group.current.position.set(
         Number(
           posArr[planetPositionIndex.current].position.x / distanceScaleFactor
@@ -86,191 +77,154 @@ export const SharedPlanetState = ({ initialData }) => {
           posArr[planetPositionIndex.current].position.z / distanceScaleFactor
         )
       );
-      if (speed > 0) planetPositionIndex.current += Number(speed);
-      lineArr.current.push(
-        new THREE.Vector3(
-          Number(
-            posArr[planetPositionIndex.current].position.x / distanceScaleFactor
-          ),
-          Number(
-            posArr[planetPositionIndex.current].position.y / distanceScaleFactor
-          ),
-          Number(
-            posArr[planetPositionIndex.current].position.z / distanceScaleFactor
+
+      //realtime
+
+      customData.current.setDate(
+        new Date(positions[199][planetPositionIndex.current].date)
+      );
+      if (speed > 0) {
+        lineArr.current.push(
+          new THREE.Vector3(
+            Number(
+              posArr[planetPositionIndex.current].position.x /
+                distanceScaleFactor
+            ),
+            Number(
+              posArr[planetPositionIndex.current].position.y /
+                distanceScaleFactor
+            ),
+            Number(
+              posArr[planetPositionIndex.current].position.z /
+                distanceScaleFactor
+            )
           )
-        )
+        );
+      }
+    }
+    //realtime
+    if (speed == -1) {
+      group.current.position.set(
+        Number(realPos.position.x / distanceScaleFactor),
+        Number(realPos.position.y / distanceScaleFactor),
+        Number(realPos.position.z / distanceScaleFactor)
+      );
+      customData.current.setDate(
+        new Date(realPos.date)
       );
     }
   }
 
-  const getPositions = (planet, setPosState, oldState) => {
-    //if speed was changed delete old data an get new data
+  useFrame(({ clock }) => {
+    if (first.current) {
+      getAllPositions();
+      getRealTimePos();
+      first.current = false;
+    }
+    if (speed > 0 && !loading) planetPositionIndex.current += Number(speed);
+    const timeSinceLastUpdate = clock.elapsedTime - lastPositionUpdate.current;
+    const timeSinceLastRealUpdate = clock.elapsedTime - lastRealPositionUpdate.current;
+    if(timeSinceLastRealUpdate > 60) {
+      lastRealPositionUpdate.current = clock.elapsedTime;
+      getRealTimePos()
+    }
+    if (timeSinceLastUpdate >= 1 && !loading && speed > 0) {
+      
+      getAllPositions();
+      lastPositionUpdate.current = clock.elapsedTime;
+    }
+  });
 
-    //???????Why when i set the speed to 0 it doesnt immidiatly stop? good enough for know
-    /*    if (speedChanged) {
-      //console.log(oldState.length);
-      //console.log(posCounter);
-      setPosState(oldState.slice(0, 500));
-
-      //console.log("here" + speedChanged);
-    } */
-
-    if (oldState.length - planetPositionIndex.current < 15000) {
-      //console.log("there" + speedChanged);
-      setSpeedChanged(false);
-      if (oldState.length > 0 && speed > 0) {
-        dateTime.current = new Date(
-          oldState[oldState.length - 1].date
-        ).toUTCString();
-      }
-
-      const fetchData = async () => {
-        fetch(
-          `http://127.0.0.1:8000/duration/${planet}` +
-            `?date=${dateTime.current}&speed=${speed}`
-        ).then((response) => {
-          if (!response.ok) {
-            throw new Error(
-              `This is an HTTP error: The status is ${response.status}`
-            );
-          }
-          loadingRef.current = true;
-          response
-            .json()
-            .then((data) => {
-              setPosState(oldState.concat(data));
-              setData(data);
-              dataRef.current = data;
-              errRef.current = null;
-            })
-            .catch((err) => {
-              setData(null);
-              dataRef.current = null;
-              errRef.current = err.message;
-            })
-            .finally(() => {
-              loadingRef.current = false;
-            });
-        });
-      };
-      fetchData();
+  const getAllPositions = () => {
+    if (positions && positions[199].length > 0 && speed > 0) {
+      dateTime.current = new Date(
+        positions[199][positions[199].length - 1].date
+      ).toUTCString();
     }
 
-    //console.log(oldState.length);
-  };
-
-  const dataRef = useRef(null);
-  const loadingRef = useRef(false);
-  const errRef = useRef(null);
-  const [data, setData] = useState(null);
-
-  useFrame(({ clock }) => {
-    //console.log(initialData);
-    /* handlePositionIndex();
     const fetchData = async () => {
-      fetch(`http://127.0.0.1:8000/duration`).then((response) => {
+      fetch(
+        `http://127.0.0.1:8000/duration` + `?date=${dateTime.current}`
+      ).then((response) => {
         if (!response.ok) {
           throw new Error(
             `This is an HTTP error: The status is ${response.status}`
           );
         }
-        loadingRef.current = true;
         response
           .json()
           .then((data) => {
-            setData(data);
-            dataRef.current = data;
-            errRef.current = null;
+            if (!positions) {
+              setPositions(data);
+            } else {
+              let obj = new Object();
+              for (let key in positions) {
+                obj[key] = positions[key].concat(data[key]);
+              }
+              setPositions(obj);
+            }
           })
-          .catch((err) => {
-            setData(null);
-            dataRef.current = null;
-            errRef.current = err.message;
-          })
+          .catch(() => {})
           .finally(() => {
-            loadingRef.current = false;
+            setLoading(false);
           });
       });
     };
-    const timeSinceLastUpdate = clock.elapsedTime - lastGetRequestRef.current;
-    if (timeSinceLastUpdate >= 5) {
-      fetchData();
-      console.log(dataRef.current);
-      lastGetRequestRef.current = clock.elapsedTime;
-    } */
-  });
+    fetchData();
+  };
 
-  function handlePositionIndex() {
-    currentPosIndexRef.current++;
+  const getRealTimePos = () => {
+    const fetchData = async () => {
+      fetch(`http://127.0.0.1:8000/now`).then((response) => {
+        if (!response.ok) {
+          throw new Error(
+            `This is an HTTP error: The status is ${response.status}`
+          );
+        }
+        response
+          .json()
+          .then((data) => {
+            setRealPos(data);
+          })
+          .catch(() => {})
+          .finally(() => {
+            //setLoading(false);
+          });
+      });
+    };
+    fetchData();
+  };
+
+  const planets = [];
+  for (let planet of planetData) {
+    planets.push(
+      <Planet
+        key={planet._id}
+        planetData={planet}
+        setPosition={updatePlanetPosition}
+        positions={positions && positions[planet._id]}
+        realPos={realPos && realPos[planet._id]}
+        linePos={linePos && linePos[planet._id]}
+      />
+    );
   }
 
   return (
     <>
-      <PlanetOverlayContext.Provider value={{ nameVis, iconVis, speed }}>
-        {initialData && (
-          <>
-            <Earth
-              speed={speed}
-              getPosition={getPositions}
-              speedChanged={speedChanged}
-              data={initialData["399"]}
-              setPosition={updatePlanetPosition}
-            />
-            <Mars
-              speed={speed}
-              getPosition={getPositions}
-              speedChanged={speedChanged}
-              data={initialData["499"]}
-              setPosition={updatePlanetPosition}
-            />
-            <Jupiter
-              speed={speed}
-              getPosition={getPositions}
-              data={initialData["599"]}
-              setPosition={updatePlanetPosition}
-            />
-            <Saturn
-              speed={speed}
-              getPosition={getPositions}
-              data={initialData["699"]}
-              setPosition={updatePlanetPosition}
-            />
-            <Mercury
-              speed={speed}
-              getPosition={getPositions}
-              data={initialData["199"]}
-              setPosition={updatePlanetPosition}
-            />
-
-            <Venus
-              speed={speed}
-              getPosition={getPositions}
-              data={initialData["299"]}
-              setPosition={updatePlanetPosition}
-            />
-            <Neptune
-              speed={speed}
-              getPosition={getPositions}
-              data={initialData["899"]}
-              setPosition={updatePlanetPosition}
-            />
-            <Uranus
-              speed={speed}
-              getPosition={getPositions}
-              data={initialData["799"]}
-              setPosition={updatePlanetPosition}
-            />
-            <Sun />
-          </>
+      <PlanetOverlayContext.Provider value={{ nameVis, iconVis, speed, pathVis }}>
+        {!loading && planets}
+        {loading && (
+          <Html>
+            <h1 style={{color:"white"}}>Loading...</h1>
+          </Html>
         )}
-        {false && (
-          <Planet
-            posArr={data["199"]}
-            planetPosIndex={currentPosIndexRef}
-            speed={speed}
-          />
-        )}
+        <Sun />
       </PlanetOverlayContext.Provider>
     </>
   );
+};
+
+SharedPlanetState.propTypes = {
+  planetData: PropTypes.array,
+  linePos: PropTypes.object
 };
