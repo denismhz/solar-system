@@ -24,7 +24,7 @@ const SolarSystemScene = () => {
 
   useLayoutEffect(() => {
     const fetchPlanetInfo = async () => {
-      fetch(`http://127.0.0.1:8000/planetInfo`).then((response) => {
+      fetch(`http://192.168.1.136:8000/planetInfo`).then((response) => {
         if (!response.ok) {
           throw new Error(
             `This is an HTTP error: The status is ${response.status}`
@@ -46,7 +46,7 @@ const SolarSystemScene = () => {
     };
     fetchPlanetInfo();
     const fetchLinePos = async () => {
-      fetch(`http://127.0.0.1:8000/duration/line`).then((response) => {
+      fetch(`http://192.168.1.136:8000/duration/line`).then((response) => {
         if (!response.ok) {
           throw new Error(
             `This is an HTTP error: The status is ${response.status}`
