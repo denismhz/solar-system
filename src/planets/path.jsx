@@ -82,7 +82,7 @@ export const PlanetPath = ({
     if(first.current){
       const fetchLinePos = async () => {
         fetch(
-          `http://127.0.0.1:8000/duration/line?name=${planet.name}&id=${planet.id}&LOY=${planet.year}`
+          `http://192.168.1.136:8000/duration/line?name=${planet.name}&id=${planet.id}&LOY=${planet.year}`
         ).then((response) => {
           if (!response.ok) {
             throw new Error(

@@ -137,7 +137,8 @@ canvas {
   z-index: 10;
   display: flex;
   justify-content: center;
-  bottom:3%;
+  top:95%;
+  height: 20px;
   width: 100%;
 }
 
