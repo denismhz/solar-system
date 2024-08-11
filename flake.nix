@@ -12,6 +12,7 @@
         devShells.default = pkgs.mkShell {
           buildInputs = [ pkgs.nodejs pkgs.nodePackages.npm ];
           shellHook = ''
+            echo "ASDASD"
             npm install --legacy-peer-deps
           '';
         };
